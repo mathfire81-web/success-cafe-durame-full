@@ -1,0 +1,58 @@
+/*
+  DESIGN TOKENS - Success Cafe, Durame Town
+  ------------------------------------------
+  Pine green storefront color + a warm orange/coral accent, on a soft
+  cream-beige background - matched to the reference look supplied.
+*/
+
+:root {
+  /* Greens - storefront & text */
+  --forest-950: #0b2a1f;   /* deepest green - header/footer bg */
+  --forest-800: #123f2c;   /* section backgrounds */
+  --forest-700: #164a34;
+  --forest-600: #1e5c40;   /* primary brand green */
+  --forest-500: #2c7350;   /* hover / lighter accents */
+  --forest-100: #e4efe7;   /* pale green tint for backgrounds */
+
+  /* Orange/coral accent - warm, friendly, high-energy against the
+     pine green storefront color */
+  --gold-700: #b8541f;     /* deep burnt orange, text on light bg */
+  --gold-600: #e2691f;     /* primary orange accent */
+  --gold-500: #ef8a3d;
+  --gold-400: #f5a962;     /* light orange for dark backgrounds */
+  --gold-200: #fbd9b8;     /* pale peach highlight */
+
+  /* Menu-card palette - peach/tan card stock with a deep maroon rule */
+  --menu-card: #eecb9e;
+  --menu-card-2: #f3ddb4;
+  --menu-rule: #8a3a2e;
+
+  /* Amharic script font, for bilingual menu labels */
+  --font-amharic: 'Noto Sans Ethiopic', 'Playfair Display', serif;
+
+  /* Neutrals */
+  --cream: #faf6ec;        /* page background */
+  --cream-2: #f0e2c4;      /* card / section alt background - warm beige */
+  --ink: #201d16;          /* body text */
+  --ink-soft: #4a4638;     /* secondary text */
+  --white: #ffffff;
+
+  /* Typography - a high-contrast display serif for headlines, paired
+     with a friendly, rounded geometric sans for nav/body copy. */
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-body: "Poppins", "Segoe UI", Helvetica, Arial, sans-serif;
+
+  /* Layout */
+  --max-width: 1200px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+  --radius-md: 18px;
+  --radius-lg: 30px;
+  --shadow-soft: 0 20px 45px -20px rgba(11, 42, 31, 0.45);
+
+  /* Header height once scrolled (fixed header) - used to offset
+     sticky elements like the menu filter bar so it never hides
+     underneath the header on mobile. */
+  --header-h: 60px;
+  --header-h-tall: 76px;
+}

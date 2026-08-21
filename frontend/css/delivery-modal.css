@@ -1,0 +1,509 @@
+/* ==========================================================================
+   DELIVERY MODAL - floats over whatever page the person is on.
+   No photos, no filler copy: a stat strip, a zone checker, and two
+   bold calls to action out. Reuses the DELIVERY_ZONES data/logic from
+   js/delivery.js by matching its element IDs.
+   ========================================================================== */
+
+.delivery-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(11, 42, 31, 0.55);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: backdrop-filter 0.32s ease, -webkit-backdrop-filter 0.32s ease;
+}
+.delivery-modal-overlay.is-open {
+  display: flex;
+  animation: dm-fade-in 0.28s ease forwards;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+@keyframes dm-fade-in {
+  from { background: rgba(11, 42, 31, 0); }
+  to { background: rgba(11, 42, 31, 0.55); }
+}
+
+.delivery-modal {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: var(--cream);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 50px 100px -20px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 215, 0, 0.08),
+    0 0 60px -10px rgba(212, 175, 55, 0.35);
+  padding: 34px 30px 26px;
+  animation: dm-pop-in 0.42s cubic-bezier(.16,1.08,.3,1);
+  transform-origin: center bottom;
+}
+
+@keyframes dm-pop-in {
+  0%   { opacity: 0; transform: translateY(46px) scale(0.9); }
+  60%  { opacity: 1; transform: translateY(-4px) scale(1.015); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---- Staggered reveal of the panel's own sections, so content
+   cascades in just behind the panel itself rather than popping in
+   as one flat block. ---- */
+.delivery-modal-head,
+.delivery-modal-stats,
+.delivery-modal-body,
+.delivery-modal-foot {
+  animation: dm-content-in 0.5s cubic-bezier(.2,.7,.3,1) both;
+}
+.delivery-modal-head   { animation-delay: 0.06s; }
+.delivery-modal-stats  { animation-delay: 0.12s; }
+.delivery-modal-body   { animation-delay: 0.18s; }
+.delivery-modal-foot   { animation-delay: 0.26s; }
+
+@keyframes dm-content-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dm-stat {
+  animation: dm-content-in 0.45s cubic-bezier(.2,.7,.3,1) both;
+}
+.delivery-modal-stats .dm-stat:nth-child(1) { animation-delay: 0.14s; }
+.delivery-modal-stats .dm-stat:nth-child(2) { animation-delay: 0.19s; }
+.delivery-modal-stats .dm-stat:nth-child(3) { animation-delay: 0.24s; }
+
+.delivery-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cream-2);
+  color: var(--forest-950);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.delivery-modal-close:hover { background: var(--gold-200); }
+.delivery-modal-close:active { transform: scale(0.9); }
+.delivery-modal-close .icon { width: 16px; height: 16px; }
+
+.delivery-modal-head { padding-right: 30px; margin-bottom: 20px; }
+.delivery-modal-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-600);
+  margin: 0 0 6px;
+}
+.delivery-modal-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  margin: 0;
+  color: var(--forest-950);
+}
+
+/* ---- Stat strip: numbers, not sentences ---- */
+.delivery-modal-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.dm-stat {
+  background: var(--forest-950);
+  color: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.dm-stat .icon { width: 18px; height: 18px; color: var(--gold-400); }
+.dm-stat strong { font-family: var(--font-display); font-size: 1.02rem; }
+.dm-stat span { font-size: 0.66rem; color: rgba(250,246,236,0.65); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---- Live delivery-zone map ---- */
+.dm-map-wrap {
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1.5px solid rgba(11, 42, 31, 0.14);
+  box-shadow: 0 18px 34px -20px rgba(11, 42, 31, 0.5);
+  animation: dm-content-in 0.5s cubic-bezier(.2,.7,.3,1) both;
+  animation-delay: 0.15s;
+}
+#dm-map {
+  display: block;
+  height: 220px;
+  width: 100%;
+  border: 0;
+  background: var(--cream-2);
+}
+.dm-map-badge {
+  background: rgba(250, 246, 236, 0.1);
+  color: var(--cream);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 5px 9px 5px 7px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.dm-map-badge .icon { width: 12px; height: 12px; color: var(--gold-400); flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  #dm-map { height: 185px; }
+}
+
+/* ---- Map controls (top-right) ---- */
+.dm-map-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 401;
+  display: flex;
+  gap: 6px;
+}
+.dm-map-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--white);
+  color: var(--forest-950);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 16px -6px rgba(0,0,0,0.4);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.dm-map-btn:hover { background: var(--gold-200); }
+.dm-map-btn:active { transform: scale(0.9); }
+.dm-map-btn .icon { width: 15px; height: 15px; }
+
+/* ---- Info toggle (bottom-right of the map): single icon that reveals
+   the cafe location + route/fee details without covering the map. ---- */
+.dm-map-info-toggle {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  z-index: 402;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--forest-950);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 18px -8px rgba(0,0,0,0.55);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.dm-map-info-toggle .icon { width: 16px; height: 16px; color: var(--gold-400); }
+.dm-map-info-toggle:hover { background: var(--forest-900, #123626); }
+.dm-map-info-toggle:active { transform: scale(0.92); }
+.dm-map-info-toggle.is-active { background: var(--gold-500); }
+.dm-map-info-toggle.is-active .icon { color: var(--forest-950); }
+
+/* ---- Floating info panel: opens above the toggle icon, bottom-right ---- */
+.dm-route-card {
+  position: absolute;
+  right: 10px;
+  bottom: 52px;
+  left: auto;
+  z-index: 401;
+  width: min(238px, calc(100% - 20px));
+  background: var(--forest-950);
+  color: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 12px 34px 12px 14px;
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  box-shadow: 0 16px 30px -10px rgba(0,0,0,0.55);
+  transform-origin: bottom right;
+}
+.dm-route-card.is-open {
+  display: flex;
+  animation: dm-content-in 0.22s cubic-bezier(.2,.7,.3,1) both;
+}
+.dm-route-card-info h4 {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  line-height: 1.2;
+}
+.dm-route-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.68rem;
+  color: rgba(250, 246, 236, 0.7);
+}
+.dm-route-card-stats strong {
+  color: var(--gold-400);
+  font-size: 0.78rem;
+  font-family: var(--font-body);
+}
+.dm-route-card-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+.dm-route-card-close:hover { background: rgba(255, 255, 255, 0.24); }
+.dm-route-card-close .icon { width: 11px; height: 11px; }
+
+@media (max-width: 640px) {
+  .dm-route-card { right: 8px; bottom: 48px; width: min(220px, calc(100% - 16px)); }
+}
+
+/* ---- Landmark chip row: tap-friendly alternative to map pins ---- */
+.dm-landmarks-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 4px;
+  margin-bottom: 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 42, 31, 0.25) transparent;
+}
+.dm-landmarks-row::-webkit-scrollbar { height: 6px; }
+.dm-landmarks-row::-webkit-scrollbar-thumb {
+  background: rgba(11, 42, 31, 0.2);
+  border-radius: var(--radius-pill);
+}
+.dm-landmark-chip {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 142px;
+  max-width: 168px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(11, 42, 31, 0.14);
+  background: var(--white);
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.dm-landmark-chip:hover { border-color: var(--gold-500); transform: translateY(-1px); }
+.dm-landmark-chip.is-active {
+  border-color: var(--gold-600);
+  background: var(--gold-200);
+}
+.dm-landmark-chip strong {
+  font-size: 0.76rem;
+  color: var(--forest-950);
+  line-height: 1.25;
+  white-space: normal;
+}
+.dm-landmark-chip span {
+  font-size: 0.68rem;
+  color: var(--gold-700);
+  font-weight: 700;
+}
+
+/* ---- Food picker: "Choose your food" list with quantity steppers,
+   embedded right in the panel so people can build an order without
+   leaving. Reuses MENU_DATA (js/menu-data.js) via js/food-picker.js. ---- */
+.food-picker { margin-top: 22px; }
+
+.food-picker-label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--forest-950);
+  margin: 0 0 10px;
+}
+.food-picker-label .label-am {
+  font-family: var(--font-amharic);
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.food-picker-box {
+  border: 1.5px solid rgba(11, 42, 31, 0.14);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 2px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 42, 31, 0.25) transparent;
+}
+.food-picker-box::-webkit-scrollbar { width: 8px; }
+.food-picker-box::-webkit-scrollbar-track { background: transparent; }
+.food-picker-box::-webkit-scrollbar-thumb {
+  background: rgba(11, 42, 31, 0.25);
+  border-radius: var(--radius-pill);
+}
+
+.fp-category-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.02rem;
+  color: var(--gold-700);
+  margin: 20px 0 4px;
+}
+.fp-category:first-child .fp-category-name { margin-top: 16px; }
+.fp-category-name-am {
+  font-family: var(--font-amharic);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--gold-600);
+}
+
+.fp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px dashed rgba(11, 42, 31, 0.12);
+}
+.fp-category:last-child .fp-item:last-child { border-bottom: none; }
+
+.fp-item-info h4 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.94rem;
+  color: var(--forest-950);
+  margin: 0 0 4px;
+}
+.fp-item-name-am {
+  font-family: var(--font-amharic);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.fp-item-price {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold-700);
+}
+
+.fp-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cream-2);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  flex-shrink: 0;
+}
+.fp-stepper-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--white);
+  color: var(--gold-700);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(11, 42, 31, 0.14);
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+.fp-stepper-btn:hover { background: var(--gold-200); }
+.fp-stepper-btn:active { transform: scale(0.9); }
+.fp-stepper-value {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--forest-950);
+}
+
+/* ---- Footer CTAs: this is the last thing people see in the panel,
+   so it gets the boldest treatment - two full-width, icon-led buttons
+   rather than quiet text links. ---- */
+.delivery-modal-foot {
+  display: flex;
+  gap: 12px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px dashed rgba(11, 42, 31, 0.15);
+}
+.dm-foot-btn {
+  flex: 1;
+  padding: 15px 18px;
+  font-size: 0.92rem;
+  box-shadow: 0 14px 28px -14px rgba(11, 42, 31, 0.35);
+}
+.dm-foot-btn.btn-gold { box-shadow: 0 14px 28px -12px rgba(185, 134, 47, 0.55); }
+.dm-foot-btn .icon { width: 17px; height: 17px; stroke-width: 2; }
+
+/* ---- Body lock while modal is open ---- */
+body.delivery-modal-open { overflow: hidden; }
+
+/* ---- Responsive: bottom-sheet on phones ---- */
+@media (max-width: 640px) {
+  .delivery-modal-overlay { padding: 0; align-items: flex-end; }
+  .delivery-modal {
+    max-width: none;
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 24px 24px 0 0;
+    padding: 26px 20px 22px;
+    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+  .delivery-modal-overlay.is-open .delivery-modal {
+    animation: dm-sheet-up 0.22s cubic-bezier(.2,.8,.3,1.1);
+  }
+  .delivery-modal-stats { gap: 8px; }
+  .dm-stat { padding: 10px 6px; }
+  .dm-stat strong { font-size: 0.9rem; }
+}
+
+@keyframes dm-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (max-width: 400px) {
+  .delivery-modal-head h2 { font-size: 1.3rem; }
+  .delivery-modal-foot { flex-direction: column; }
+}

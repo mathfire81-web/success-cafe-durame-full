@@ -1,0 +1,22 @@
+{
+  "name": "success-cafe-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend + admin dashboard for Success Cafe Durame - orders, menu, and manual payment verification.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/scripts/migrate.js",
+    "seed": "node src/scripts/seed.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "multer": "^1.4.5-lts.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5"
+  }
+}

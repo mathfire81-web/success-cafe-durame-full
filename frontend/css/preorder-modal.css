@@ -1,0 +1,244 @@
+/* ==========================================================================
+   PRE ORDER FOOD MODAL - floats over whatever page the person is on,
+   opened by any ".js-preorder-trigger" (hero CTA + header nav button).
+   Lets someone reserve a table and pick food ahead of time. Shares the
+   help/idea modal's overlay + close-button chrome, but gets its own
+   dark banner header (like the delivery panel) since this one leads
+   with a reservation, not a quick form. Reuses the site-wide
+   .form-grid / .form-field / .food-picker / .fp-* classes already
+   defined in cart.css and delivery-modal.css so the fields and the
+   quantity steppers look identical to the rest of the site.
+   ========================================================================== */
+
+.preorder-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  background: rgba(11, 42, 31, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.preorder-modal-overlay.is-open {
+  display: flex;
+  animation: pm-fade-in 0.18s ease;
+}
+
+@keyframes pm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.preorder-modal {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: var(--cream);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
+  animation: pm-pop-in 0.22s cubic-bezier(.2, .8, .3, 1.1);
+}
+
+@keyframes pm-pop-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---- Header nav trigger (sits next to "Order Now") ---- */
+.btn-preorder-nav {
+  min-height: 44px;
+  padding: 11px 20px;
+  font-size: 0.86rem;
+}
+.btn-preorder-nav .icon { width: 16px; height: 16px; stroke-width: 1.8; }
+
+@media (max-width: 1080px) {
+  .btn-preorder-nav span { display: none; }
+}
+
+/* ---- Dark banner header ---- */
+.preorder-modal-banner {
+  position: relative;
+  background: linear-gradient(135deg, var(--forest-950), var(--forest-700));
+  color: var(--cream);
+  padding: 30px 60px 24px 32px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.preorder-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(250, 246, 236, 0.14);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.preorder-modal-close:hover { background: rgba(250, 246, 236, 0.26); }
+.preorder-modal-close:active { transform: scale(0.9); }
+.preorder-modal-close .icon { width: 16px; height: 16px; }
+
+.preorder-modal-banner-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.preorder-modal-icon {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  color: var(--cream);
+}
+.preorder-modal-icon .icon { width: 100%; height: 100%; stroke-width: 1.5; }
+
+.preorder-modal-banner h2 {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  color: var(--cream);
+  margin: 0;
+}
+.preorder-modal-title-am {
+  display: block;
+  font-family: var(--font-amharic);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--gold-400);
+  margin-top: 2px;
+}
+.preorder-modal-banner > p {
+  font-size: 0.88rem;
+  color: rgba(250, 246, 236, 0.8);
+  margin: 0;
+  max-width: 54ch;
+}
+.preorder-modal-banner > p .label-am { color: rgba(250, 246, 236, 0.6); }
+
+/* ---- Bilingual (Amharic) labels used throughout the form/banner ---- */
+.preorder-modal .label-am {
+  font-family: var(--font-amharic);
+  font-weight: 500;
+  font-size: 0.85em;
+  color: var(--ink-soft);
+}
+.preorder-form-submit .label-am { color: inherit; opacity: 0.8; }
+
+/* ---- Body / form ---- */
+.preorder-modal-body { padding: 26px 32px 30px; }
+
+.preorder-form { display: flex; flex-direction: column; gap: 18px; }
+
+.preorder-form .form-grid { margin: 0; }
+
+/* Steppers reuse .food-picker / .fp-* from delivery-modal.css as-is;
+   just tighten the box height a little since this modal also carries
+   four extra fields above it. */
+.preorder-form .food-picker { margin-top: 0; }
+.preorder-form .food-picker-box { max-height: 240px; }
+
+.preorder-summary-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--forest-100);
+  color: var(--forest-800);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.preorder-summary-bar.is-visible { display: flex; }
+.preorder-summary-bar strong { color: var(--gold-700); }
+
+.preorder-form-submit {
+  margin-top: 4px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---- Success state (swaps in for the form, matches idea-modal's) ---- */
+.preorder-form-success {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
+.preorder-form-success.is-visible { display: flex; }
+
+.preorder-form-success-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--forest-100);
+  color: var(--forest-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.preorder-form-success-icon .icon { width: 24px; height: 24px; stroke-width: 2.4; }
+
+.preorder-form-success h3 { font-family: var(--font-display); font-size: 1.3rem; margin: 0; }
+.preorder-form-success p { font-size: 0.9rem; color: var(--ink-soft); margin: 0; max-width: 40ch; }
+
+.preorder-form-success-details {
+  width: 100%;
+  margin: 10px 0 4px;
+  padding: 16px 18px;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  border: 1px solid rgba(11, 42, 31, 0.08);
+  text-align: left;
+  font-size: 0.86rem;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.preorder-form-success-details span strong { color: var(--forest-800); }
+
+.preorder-form-success .btn { margin-top: 6px; }
+
+/* ---- Body lock while modal is open ---- */
+body.preorder-modal-open { overflow: hidden; }
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .preorder-modal-overlay { padding: 0; align-items: flex-end; }
+  .preorder-modal {
+    max-width: none;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 24px 24px 0 0;
+  }
+  .preorder-modal-banner { border-radius: 24px 24px 0 0; padding: 26px 54px 20px 22px; }
+  .preorder-modal-body { padding: 22px 20px 24px; }
+  .preorder-form .form-grid { grid-template-columns: 1fr; }
+  .preorder-modal-overlay.is-open .preorder-modal {
+    animation: pm-sheet-up 0.22s cubic-bezier(.2, .8, .3, 1.1);
+  }
+}
+
+@keyframes pm-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (max-width: 400px) {
+  .preorder-modal-banner h2 { font-size: 1.3rem; }
+}

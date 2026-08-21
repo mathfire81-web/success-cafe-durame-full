@@ -1,0 +1,349 @@
+/* ==========================================================================
+   DELIVERY PAGE - delivery.html
+   A three-step ordering flow: drop your pin, build your order, pay &
+   confirm. The signature element is the "route" tracker - a horizontal
+   line with a moving scooter marker that travels as you scroll, echoing
+   an actual delivery's progress across town.
+   ========================================================================== */
+
+.page-hero-bg--delivery {
+  background-image:
+    linear-gradient(180deg, rgba(11,42,31,0.55) 0%, rgba(11,42,31,0.5) 40%, rgba(11,42,31,0.95) 100%),
+    url("https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=1920&q=80");
+}
+
+/* ---- Route tracker (sticky step nav) --------------------------------- */
+.route-tracker-wrap {
+  position: sticky;
+  top: var(--header-h-tall);
+  z-index: 40;
+  background: var(--cream);
+  border-bottom: 1px solid rgba(11, 42, 31, 0.1);
+  box-shadow: 0 8px 20px -16px rgba(11, 42, 31, 0.4);
+}
+
+.route-tracker {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 16px 24px 14px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.route-track {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 2px;
+  background: rgba(11, 42, 31, 0.14);
+  border-radius: var(--radius-pill);
+  margin: 0 6px;
+}
+
+.route-track-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--forest-600), var(--gold-600));
+  border-radius: var(--radius-pill);
+  transition: width 0.15s linear;
+}
+
+.route-scooter {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--gold-600);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px -4px rgba(226, 105, 31, 0.7);
+  transition: left 0.15s linear;
+  z-index: 2;
+}
+.route-scooter .icon { width: 16px; height: 16px; }
+
+.route-stop {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  font-family: var(--font-body);
+}
+
+.route-stop-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 2px solid rgba(11, 42, 31, 0.3);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.route-stop.is-active .route-stop-dot {
+  border-color: var(--gold-600);
+  background: var(--gold-600);
+  transform: scale(1.15);
+}
+.route-stop.is-done .route-stop-dot {
+  border-color: var(--forest-600);
+  background: var(--forest-600);
+}
+
+.route-stop-label {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.route-stop.is-active .route-stop-label { opacity: 1; color: var(--forest-950); }
+
+@media (max-width: 720px) {
+  .route-stop-label { display: none; }
+  .route-tracker { padding: 14px 18px 12px; }
+}
+
+/* ---- Flow section shell ------------------------------------------------ */
+.flow-section {
+  padding: 90px 0 90px;
+  scroll-margin-top: 130px;
+}
+.flow-section:nth-child(even) { background: var(--cream-2); }
+
+.flow-section-head {
+  max-width: 640px;
+  margin: 0 auto 44px;
+  text-align: center;
+}
+.flow-section-head .eyebrow { justify-content: center; }
+.flow-section-head h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  color: var(--forest-950);
+  margin: 10px 0 12px;
+}
+.flow-section-head p { color: var(--ink-soft); font-size: 1rem; }
+
+.flow-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--forest-950);
+  color: var(--gold-400);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+}
+
+/* ---- Step 1: map + zone checker ---------------------------------- */
+.pin-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 34px;
+  align-items: stretch;
+}
+
+.pin-map-panel {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  min-height: 460px;
+  background: var(--forest-100);
+}
+.pin-map-panel #delivery-map { position: absolute; inset: 0; }
+
+.pin-map-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 5;
+  background: var(--cream);
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--forest-950);
+  box-shadow: 0 10px 24px -12px rgba(11,42,31,0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pin-map-badge .icon { width: 15px; height: 15px; color: var(--gold-600); }
+
+.pin-side-panel {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 30px 28px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pin-side-panel h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--forest-950);
+  margin: 0 0 6px;
+}
+.pin-side-panel > p.hint { color: var(--ink-soft); font-size: 0.88rem; margin: 0 0 18px; }
+
+/* zone checker form/result reuse .dm-* classes from delivery-modal.css */
+.pin-side-panel .dm-zones { margin-top: 18px; }
+.pin-side-panel .dm-zone-row.is-selected {
+  background: var(--forest-100);
+  border-radius: var(--radius-sm);
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+@media (max-width: 960px) {
+  .pin-layout { grid-template-columns: 1fr; }
+  .pin-map-panel { min-height: 340px; }
+}
+
+/* ---- Step 2: build your order ------------------------------------- */
+.order-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 34px;
+  align-items: start;
+}
+
+.order-picker-panel {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  padding: 10px 28px 26px;
+}
+.order-picker-panel .food-picker { margin-top: 6px; }
+.order-picker-panel .food-picker-box { max-height: 460px; }
+
+.order-live-total {
+  position: sticky;
+  top: 210px;
+  background: var(--forest-950);
+  color: var(--cream);
+  border-radius: var(--radius-lg);
+  padding: 28px 26px;
+}
+.order-live-total h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--cream);
+  margin: 0 0 4px;
+}
+.order-live-total p { color: rgba(250,246,236,0.7); font-size: 0.85rem; margin: 0 0 18px; }
+.order-live-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(250,246,236,0.18);
+}
+.order-live-total-row.is-total {
+  font-weight: 700;
+  font-size: 1.15rem;
+  border-bottom: none;
+  padding-top: 16px;
+  color: var(--gold-400);
+}
+.order-live-total .btn { width: 100%; margin-top: 18px; }
+
+@media (max-width: 900px) {
+  .order-layout { grid-template-columns: 1fr; }
+  .order-live-total { position: static; }
+}
+
+/* ---- Step 3: pay & confirm ----------------------------------------- */
+.confirm-layout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 44px;
+}
+.confirm-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 26px 22px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+}
+.confirm-card .icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--forest-100);
+  color: var(--forest-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+.confirm-card .icon-wrap .icon { width: 22px; height: 22px; }
+.confirm-card h4 { font-family: var(--font-display); font-size: 1.02rem; color: var(--forest-950); margin: 0 0 6px; }
+.confirm-card p { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
+
+.confirm-cta {
+  background: linear-gradient(120deg, var(--gold-500), var(--gold-600));
+  border-radius: var(--radius-lg);
+  padding: 44px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.confirm-cta h3 { font-family: var(--font-display); font-size: 1.5rem; color: var(--forest-950); margin: 0 0 6px; max-width: 26ch; }
+.confirm-cta p { color: rgba(11,42,31,0.75); font-size: 0.92rem; margin: 0; max-width: 40ch; }
+
+@media (max-width: 720px) {
+  .confirm-layout { grid-template-columns: 1fr; }
+  .confirm-cta { padding: 32px 24px; text-align: center; justify-content: center; }
+}
+
+/* ---- Leaflet marker + popup theming ---- */
+.dp-cafe-marker span {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--forest-600);
+  border: 3px solid var(--cream);
+  box-shadow: 0 0 0 2px var(--forest-950);
+}
+.leaflet-popup-content-wrapper { border-radius: var(--radius-sm); font-family: var(--font-body); }
+.leaflet-popup-content { margin: 10px 14px; font-size: 0.85rem; color: var(--ink); }
+.leaflet-container { font-family: var(--font-body); }
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .route-scooter, .route-track-fill { transition: none; }
+}

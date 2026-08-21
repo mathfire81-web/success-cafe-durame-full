@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us | Success Cafe</title>
+<meta name="description" content="Success Cafe in Durame town - our story, our values, our team, and the journey from a small bakery counter to the city's favorite table.">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/delivery-modal.css">
+<link rel="stylesheet" href="css/cart-drawer.css">
+<link rel="stylesheet" href="css/help-modal.css">
+<link rel="stylesheet" href="css/idea-modal.css">
+<link rel="stylesheet" href="css/about.css">
+</head>
+<body>
+
+<!-- Hidden icon sprite - professional line icons used across the header,
+     mobile tab bar, and cart controls (no emoji). -->
+<svg class="icon-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden;">
+  <symbol id="icon-home" viewBox="0 0 24 24">
+    <path d="M3 11.5 12 4l9 7.5"/>
+    <path d="M5.5 10v9a1 1 0 0 0 1 1H9v-6h6v6h2.5a1 1 0 0 0 1-1v-9"/>
+  </symbol>
+  <symbol id="icon-about" viewBox="0 0 24 24">
+    <path d="M12 6.5C10.5 5 8 4 4 4v14c4 0 6.5 1 8 2.5V6.5Z"/>
+    <path d="M12 6.5C13.5 5 16 4 20 4v14c-4 0-6.5 1-8 2.5V6.5Z"/>
+  </symbol>
+  <symbol id="icon-menu" viewBox="0 0 24 24">
+    <path d="M7 2v6a2 2 0 0 0 2 2v12"/>
+    <path d="M7 2v5M9.3 2v5M11.6 2v5"/>
+    <path d="M17.5 2c-1.7 0-3 1.8-3 4.5S15.8 11 17.5 11V22"/>
+  </symbol>
+  <symbol id="icon-delivery" viewBox="0 0 24 24">
+    <rect x="2.5" y="7" width="11" height="9" rx="1"/>
+    <path d="M13.5 10h4l3.5 3v3h-7.5z"/>
+    <circle cx="7" cy="18.5" r="1.6"/>
+    <circle cx="17.5" cy="18.5" r="1.6"/>
+  </symbol>
+  <symbol id="icon-offer" viewBox="0 0 24 24">
+    <path d="M12.6 21.4 21.4 12.6a2 2 0 0 0 0-2.8L13.6 2H4a2 2 0 0 0-2 2v9.6a2 2 0 0 0 .6 1.4l8 8a2 2 0 0 0 2.8 0Z"/>
+    <circle cx="8.5" cy="8.5" r="1.5"/>
+  </symbol>
+  <symbol id="icon-cart" viewBox="0 0 24 24">
+    <circle cx="9.5" cy="21" r="1.4"/>
+    <circle cx="18" cy="21" r="1.4"/>
+    <path d="M2.5 3h2.4l2.6 12a2 2 0 0 0 2 1.6h8a2 2 0 0 0 2-1.5L21.3 8H6"/>
+  </symbol>
+  <symbol id="icon-bag" viewBox="0 0 24 24">
+    <path d="M6.5 8h11l1 12.2a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8z"/>
+    <path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>
+  </symbol>
+  <symbol id="icon-idea" viewBox="0 0 24 24">
+    <path d="M9 18h6M10 21h4"/>
+    <path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8 1 .8 1.6V16h5.4v-.5c0-.6.3-1.2.8-1.6A6 6 0 0 0 12 3Z"/>
+  </symbol>
+  <symbol id="icon-help" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9.5"/>
+    <path d="M9.2 9.3a2.8 2.8 0 1 1 4.3 2.4c-.7.5-1.5 1-1.5 2.1"/>
+    <circle cx="12" cy="17.3" r="0.15" stroke-width="2.6"/>
+  </symbol>
+  <symbol id="icon-close" viewBox="0 0 24 24">
+    <path d="M5 5l14 14M19 5 5 19"/>
+  </symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24">
+    <path d="M4.5 12.5 9.5 17.5 19.5 6.5"/>
+  </symbol>
+  <symbol id="icon-trash" viewBox="0 0 24 24">
+    <path d="M4 7h16"/>
+    <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
+    <path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/>
+    <path d="M10 11v6M14 11v6"/>
+  </symbol>
+  <symbol id="icon-truck" viewBox="0 0 24 24">
+    <rect x="2" y="7" width="12" height="9" rx="1"/>
+    <path d="M14 10h4l3.5 3v3H14z"/>
+    <circle cx="7" cy="18" r="1.5"/>
+    <circle cx="17.5" cy="18" r="1.5"/>
+  </symbol>
+  <symbol id="icon-zone" viewBox="0 0 24 24">
+    <path d="M12 21.5s-7-6-7-11.5a7 7 0 0 1 14 0c0 5.5-7 11.5-7 11.5Z"/>
+    <circle cx="12" cy="10" r="2.6"/>
+  </symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9.5"/>
+    <path d="M12 6.5V12l3.5 2"/>
+  </symbol>
+</svg>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+  <div class="container nav-row">
+    <a href="index.html" class="logo">
+      <span class="logo-mark">
+        <img src="images/logo/logo.png" alt="Success Cafe logo" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=200&q=80';">
+      </span>
+      <span class="logo-text">Success Cafe<span>Durame Town</span></span>
+    </a>
+
+    <nav>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html" class="active">About</a></li>
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="#delivery" class="js-delivery-trigger">Delivery</a></li>
+      </ul>
+    </nav>
+
+    <div class="nav-actions">
+      <a href="#cart" class="cart-link js-cart-trigger" aria-label="View cart">
+        <svg class="icon" aria-hidden="true"><use href="#icon-cart"></use></svg>
+        <span class="cart-count">0</span>
+      </a>
+      <a href="menu.html" class="btn-order-now">
+        <span class="btn-order-now-shine"></span>
+        <span class="btn-order-now-icon"><svg class="icon" aria-hidden="true"><use href="#icon-bag"></use></svg></span>
+        <span>Order Now</span>
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+<!-- ============ MOBILE TAB BAR (phones only) ============ -->
+<nav class="mobile-tabbar" aria-label="Mobile navigation">
+  <a href="index.html" class="mobile-tab"><span class="mobile-tab-icon"><svg class="icon" aria-hidden="true"><use href="#icon-home"></use></svg></span><span class="mobile-tab-label">Home</span></a>
+  <a href="about.html" class="mobile-tab is-active"><span class="mobile-tab-icon"><svg class="icon" aria-hidden="true"><use href="#icon-about"></use></svg></span><span class="mobile-tab-label">About</span></a>
+  <a href="#cart" class="mobile-tab mobile-tab-cart js-cart-trigger" aria-label="View cart">
+    <span class="mobile-tab-cart-icon"><svg class="icon" aria-hidden="true"><use href="#icon-cart"></use></svg><span class="cart-count">0</span></span>
+    <span class="mobile-tab-label">Cart</span>
+  </a>
+  <a href="menu.html" class="mobile-tab"><span class="mobile-tab-icon"><svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg></span><span class="mobile-tab-label">Menu</span></a>
+  <a href="#delivery" class="mobile-tab js-delivery-trigger"><span class="mobile-tab-icon"><svg class="icon" aria-hidden="true"><use href="#icon-delivery"></use></svg></span><span class="mobile-tab-label">Delivery</span></a>
+</nav>
+<a href="#share-idea" class="fab-helper fab-idea js-idea-trigger" aria-label="Share an idea">
+  <svg class="icon" aria-hidden="true"><use href="#icon-idea"></use></svg>
+  <span class="fab-helper-label">Share an Idea</span>
+</a>
+<a href="#help" class="fab-helper fab-help js-help-trigger" aria-label="How to order - help">
+  <svg class="icon" aria-hidden="true"><use href="#icon-help"></use></svg>
+  <span class="fab-helper-label">Want Help?</span>
+</a>
+
+
+<!-- ============ PAGE HERO ============ -->
+<section class="page-hero">
+  <div class="page-hero-bg page-hero-bg--about"></div>
+  <div class="page-hero-content container">
+    <div class="page-hero-crumbs">
+      <a href="index.html">Home</a> <span>/</span> <span>About</span>
+    </div>
+    <p class="eyebrow">Our Story</p>
+    <h1>Every good cafe starts with <em>one honest recipe.</em></h1>
+    <p class="page-hero-lede">
+      Success Cafe grew out of a single bakery counter in Durame town into a
+      full kitchen loved across the city - built on fresh dough, strong
+      coffee, and a table that's always open for you.
+    </p>
+  </div>
+</section>
+
+<div class="scallop scallop-cream"></div>
+
+<!-- ============ OUR STORY ============ -->
+<section class="story-section">
+  <div class="container story-grid">
+
+    <div class="story-media">
+      <img class="story-media-main" src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80" alt="Baker kneading fresh dough by hand">
+      <img class="story-media-top" src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=700&q=80" alt="Fresh bread loaves cooling">
+      <img class="story-media-bottom" src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=700&q=80" alt="Interior of Success Cafe with warm lighting">
+      <div class="story-media-tag">
+        <strong>2018</strong>
+        <span>The year our bakery counter opened its doors in Durame town</span>
+      </div>
+    </div>
+
+    <div class="story-copy">
+      <p class="eyebrow">How It Started</p>
+      <h2>From a two-table bakery counter to Durame's favorite kitchen</h2>
+      <p>
+        Success Cafe began as a modest bakery counter with two tables, one
+        oven, and a simple promise: bake everything fresh, every single day.
+        Word spread quickly around Durame town, and the small counter grew
+        into a full kitchen serving pastries at sunrise, wood-fired pizza
+        and hand-pressed burgers through the day, and machiatos that keep
+        the regulars coming back long after closing time.
+      </p>
+      <p>
+        Today, Success Cafe is still run the same way it started - with
+        real ingredients, honest recipes, and a team that treats every
+        order like it's for family. Whether you're dining in, taking away,
+        or ordering delivery, you're getting the same care that opened
+        our doors in the first place.
+      </p>
+
+      <div class="story-signature">
+        <img src="https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&w=200&q=80" alt="Founder of Success Cafe">
+        <div>
+          <strong>Yonas Bekele</strong>
+          <span>Founder &amp; Head Baker, Success Cafe</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ STATS BAND ============ -->
+<section class="stats-band">
+  <div class="container stats-grid">
+    <div class="stat-item">
+      <strong>7+</strong>
+      <span>Years serving Durame town</span>
+    </div>
+    <div class="stat-item">
+      <strong>40+</strong>
+      <span>Recipes made fresh in-house</span>
+    </div>
+    <div class="stat-item">
+      <strong>500+</strong>
+      <span>Cups of coffee brewed daily</span>
+    </div>
+    <div class="stat-item">
+      <strong>15k+</strong>
+      <span>Happy customers and counting</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VALUES / WHAT WE STAND FOR ============ -->
+<section class="values-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">What We Stand For</p>
+        <h2>The values behind every plate and cup</h2>
+      </div>
+    </div>
+
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🌾</div>
+        <h3>Fresh First</h3>
+        <p>Nothing sits in a freezer. Dough, sauces and pastries are made from scratch every morning.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🤝</div>
+        <h3>Community Table</h3>
+        <p>Success Cafe is a gathering place for Durame town - regulars, families and first-time guests alike.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔥</div>
+        <h3>Craft &amp; Consistency</h3>
+        <p>Same trusted recipes, same careful hands, every single day - so your favorite always tastes right.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">💛</div>
+        <h3>Warm Hospitality</h3>
+        <p>From the first hello to the last bite, every guest is treated like they've been coming for years.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OUR JOURNEY / TIMELINE ============ -->
+<section class="journey-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Our Journey</p>
+        <h2>Milestones along the way</h2>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-row">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <strong>2018</strong>
+          <h3>The Bakery Counter</h3>
+          <p>Success Cafe opens with two tables and a single oven in the heart of Durame town.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <strong>2020</strong>
+          <h3>The Coffee Bar</h3>
+          <p>We add a full espresso bar, and machiatos quickly become a local favorite.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <strong>2022</strong>
+          <h3>Pizza &amp; Burgers</h3>
+          <p>A wood-fired oven and grill join the kitchen, rounding out the menu for every craving.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <strong>2025</strong>
+          <h3>Delivery Launch</h3>
+          <p>Success Cafe goes online, bringing fresh bakes and hot meals to doorsteps across Durame town.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section class="team-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Meet The Team</p>
+        <h2>The hands behind every dish</h2>
+      </div>
+    </div>
+
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-photo">
+          <img src="https://images.unsplash.com/photo-1607631568010-a87245c0daf8?auto=format&fit=crop&w=600&q=80" alt="Yonas Bekele, Founder and Head Baker">
+        </div>
+        <h3>Yonas Bekele</h3>
+        <span>Founder &amp; Head Baker</span>
+      </div>
+      <div class="team-card">
+        <div class="team-photo">
+          <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80" alt="Sara Alemu, Head Chef">
+        </div>
+        <h3>Sara Alemu</h3>
+        <span>Head Chef</span>
+      </div>
+      <div class="team-card">
+        <div class="team-photo">
+          <img src="https://images.unsplash.com/photo-1594744803329-e58685269f6b?auto=format&fit=crop&w=600&q=80" alt="Dawit Tesfaye, Head Barista">
+        </div>
+        <h3>Dawit Tesfaye</h3>
+        <span>Head Barista</span>
+      </div>
+      <div class="team-card">
+        <div class="team-photo">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=600&q=80" alt="Helen Girma, Front of House Manager">
+        </div>
+        <h3>Helen Girma</h3>
+        <span>Front of House Manager</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY ============ -->
+<section class="gallery-section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">A Look Inside</p>
+        <h2>Life at Success Cafe</h2>
+      </div>
+    </div>
+
+    <div class="gallery-strip">
+      <div class="gallery-item-a">
+        <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80" alt="Cafe interior seating area">
+      </div>
+      <div class="gallery-item-b">
+        <img src="https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=700&q=80" alt="Fresh bread baking">
+      </div>
+      <div class="gallery-item-c">
+        <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=700&q=80" alt="Wood fired pizza fresh from the oven">
+      </div>
+      <div class="gallery-item-d">
+        <img src="https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?auto=format&fit=crop&w=700&q=80" alt="Latte art on a machiato">
+      </div>
+      <div class="gallery-item-e">
+        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=80" alt="Hand pressed burger plated">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA BAND ============ -->
+<section class="cta-band">
+  <div class="container cta-band-row">
+    <div>
+      <p class="eyebrow">Come Say Hello</p>
+      <h2>Pull up a seat, or let us bring Success Cafe to you</h2>
+    </div>
+    <div class="cta-band-actions">
+      <a href="menu.html" class="btn btn-forest">View Our Menu</a>
+      <a href="#delivery" class="btn btn-outline-dark js-delivery-trigger">Order Delivery</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer" id="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="index.html" class="logo"><span class="logo-text">Success Cafe<span>Durame Town</span></span></a>
+        <p style="margin-top:16px;">Fresh pastries, pizza, burgers and coffee - baked, grilled and brewed daily in Durame town.</p>
+      </div>
+
+      <div>
+        <h4>Explore</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="menu.html">Menu</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Order</h4>
+        <ul class="footer-links">
+          <li><a href="#delivery" class="js-delivery-trigger">Delivery</a></li>
+          <li><a href="#cart" class="js-cart-trigger">Your Cart</a></li>
+          <li><a href="payment-verification.html">Payment Verification</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Visit Us</h4>
+        <p>Success Cafe<br>Durame Town</p>
+        <p>Open daily &middot; 7:00 AM - 9:00 PM</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; 2026 Success Cafe, Durame Town. All rights reserved.</span>
+      <span>Made with care, one bake at a time.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/delivery-modal.js"></script>
+<script src="js/help-modal.js"></script>
+<script src="js/idea-modal.js"></script>
+<script src="js/delivery-map.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/cart-drawer.js"></script>
+<script src="js/menu-data.js"></script>
+<script src="js/food-picker.js"></script>
+
+<!-- ============ DELIVERY MODAL (floats over any page) ============ -->
+<div class="delivery-modal-overlay" id="delivery-modal-overlay">
+  <div class="delivery-modal" role="dialog" aria-modal="true" aria-labelledby="delivery-modal-title">
+    <button type="button" class="delivery-modal-close" id="delivery-modal-close" aria-label="Close delivery panel">
+      <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+
+    <div class="delivery-modal-head">
+      <p class="delivery-modal-eyebrow">Delivery</p>
+      <h2 id="delivery-modal-title">Hot to your door, fast.</h2>
+    </div>
+
+    <div class="delivery-modal-stats">
+      <div class="dm-stat"><svg class="icon" aria-hidden="true"><use href="#icon-clock"></use></svg><strong>~30 min</strong><span>Avg. time</span></div>
+      <div class="dm-stat"><svg class="icon" aria-hidden="true"><use href="#icon-zone"></use></svg><strong>5 zones</strong><span>Across Durame</span></div>
+      <div class="dm-stat"><svg class="icon" aria-hidden="true"><use href="#icon-truck"></use></svg><strong>30-70 Br</strong><span>Delivery fee</span></div>
+    </div>
+
+    <div class="delivery-modal-body">
+      <div class="dm-map-wrap">
+        <iframe id="dm-map" title="Map of Success Cafe and nearby delivery landmarks in Durame town" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+
+        <div class="dm-map-controls">
+          <button type="button" class="dm-map-btn" id="dm-map-reset" aria-label="Show all delivery landmarks">
+            <svg class="icon" aria-hidden="true"><use href="#icon-zone"></use></svg>
+          </button>
+        </div>
+
+        <button type="button" class="dm-map-info-toggle" id="dm-map-info-toggle" aria-label="Show location and delivery details" aria-expanded="false">
+          <svg class="icon" aria-hidden="true"><use href="#icon-zone"></use></svg>
+        </button>
+
+        <div class="dm-route-card" id="dm-route-card">
+          <button type="button" class="dm-route-card-close" id="dm-route-card-close" aria-label="Close details">
+            <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+          </button>
+          <span class="dm-map-badge">
+            <svg class="icon" aria-hidden="true"><use href="#icon-zone"></use></svg>
+            Success Cafe &middot; Downtown Durame
+          </span>
+          <div class="dm-route-card-info">
+            <h4 id="dm-route-card-title">Pick a landmark below</h4>
+            <div class="dm-route-card-stats">
+              <span><strong id="dm-route-card-km">&mdash;</strong> away</span>
+              <span><strong id="dm-route-card-time">&mdash;</strong></span>
+              <span><strong id="dm-route-card-fee">&mdash;</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dm-landmarks-row" id="dm-landmarks-row"></div>
+
+      <div class="food-picker">
+        <p class="food-picker-label">Choose your food <span class="label-am">(ምግቦትን ይምረጡ)</span></p>
+        <div class="food-picker-box" id="food-picker-list"></div>
+      </div>
+    </div>
+
+    <div class="delivery-modal-foot">
+      <a href="payment-verification.html" class="btn btn-gold dm-foot-btn" id="dm-checkout-btn">
+        <svg class="icon" aria-hidden="true"><use href="#icon-bag"></use></svg>
+        Checkout
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CART DRAWER (floats over any page, slides in from the right) ============ -->
+<div class="cart-drawer-overlay" id="cart-drawer-overlay">
+  <aside class="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title">
+    <div class="cart-drawer-head">
+      <div class="cart-drawer-brand">
+        <span class="cart-drawer-mark">
+          <img src="images/logo/logo.png" alt="" aria-hidden="true" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=100&q=80';">
+        </span>
+        <div>
+          <p class="cart-drawer-eyebrow">Success Cafe</p>
+          <h2 id="cart-drawer-title">Your Order</h2>
+        </div>
+      </div>
+      <button type="button" class="cart-drawer-close" id="cart-drawer-close" aria-label="Close cart">
+        <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+      </button>
+    </div>
+
+    <div class="cart-drawer-body">
+      <ul class="cart-items-list" id="cart-items-list"></ul>
+
+      <div class="cart-empty" id="cart-empty">
+        <div class="cart-empty-icon"><svg class="icon" aria-hidden="true"><use href="#icon-cart"></use></svg></div>
+        <h3>Nothing here yet</h3>
+        <p>Your favorites are just a tap away - fresh pizza, hand-pressed burgers and rich machiatos, ready when you are.</p>
+        <a href="menu.html" class="btn btn-gold cart-drawer-btn-full">Browse the Menu</a>
+      </div>
+    </div>
+
+    <div class="cart-drawer-foot" id="cart-drawer-foot">
+      <div class="cart-drawer-fulfillment" id="cart-drawer-fulfillment"></div>
+      <div class="cart-drawer-total-row"><span>Total</span><span id="cart-drawer-total">0 ETB</span></div>
+      <a href="payment-verification.html" class="btn btn-gold cart-drawer-btn-full" id="checkout-btn">Checkout</a>
+    </div>
+  </aside>
+</div>
+
+<!-- ============ HELP MODAL (floats over any page) ============ -->
+<div class="help-modal-overlay" id="help-modal-overlay">
+  <div class="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+    <button type="button" class="help-modal-close" id="help-modal-close" aria-label="Close help panel">
+      <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+
+    <div class="help-modal-head">
+      <p class="help-modal-eyebrow">Need a Hand?</p>
+      <h2 id="help-modal-title">How to Order at Success Cafe</h2>
+      <p>Whether you're craving delivery or stopping by in person, here's exactly how it works.</p>
+    </div>
+
+    <div class="help-columns">
+      <div class="help-col">
+        <div class="help-col-head">
+          <span class="help-col-icon"><svg class="icon" aria-hidden="true"><use href="#icon-truck"></use></svg></span>
+          <div>
+            <h3>Ordering for Delivery</h3>
+            <span>Hot food, straight to your door</span>
+          </div>
+        </div>
+        <ol class="help-steps">
+          <li class="help-step">
+            <span class="help-step-line"></span>
+            <div class="help-step-body">
+              <h4>Add to your cart</h4>
+              <p>Browse the Menu or use the Delivery panel's food picker to add what you're craving.</p>
+            </div>
+          </li>
+          <li class="help-step">
+            <span class="help-step-line"></span>
+            <div class="help-step-body">
+              <h4>Choose delivery &amp; address</h4>
+              <p>Open your cart, select "Delivery," and drop your address in Durame town.</p>
+            </div>
+          </li>
+          <li class="help-step">
+            <span class="help-step-line"></span>
+            <div class="help-step-body">
+              <h4>Verify your payment</h4>
+              <p>Pay with Telebirr, CBE Birr, bank transfer, or cash, then confirm your order.</p>
+            </div>
+          </li>
+          <li class="help-step">
+            <div class="help-step-body">
+              <h4>We bring it to you</h4>
+              <p>Sit back - hot food arrives at your door in about 30 minutes.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="help-col">
+        <div class="help-col-head">
+          <span class="help-col-icon"><svg class="icon" aria-hidden="true"><use href="#icon-cart"></use></svg></span>
+          <div>
+            <h3>Ordering In the Cafe</h3>
+            <span>Walk in, sit down, dig in</span>
+          </div>
+        </div>
+        <ol class="help-steps">
+          <li class="help-step">
+            <span class="help-step-line"></span>
+            <div class="help-step-body">
+              <h4>Walk in or browse ahead</h4>
+              <p>Visit us in Durame town, or check the Menu online before you arrive.</p>
+            </div>
+          </li>
+          <li class="help-step">
+            <span class="help-step-line"></span>
+            <div class="help-step-body">
+              <h4>Tell us what you'd like</h4>
+              <p>Order at the counter, or add items to your cart and choose "Pickup."</p>
+            </div>
+          </li>
+          <li class="help-step">
+            <span class="help-step-line"></span>
+            <div class="help-step-body">
+              <h4>Pay your way</h4>
+              <p>Cash, Telebirr, CBE Birr, or bank transfer - whatever's easiest for you.</p>
+            </div>
+          </li>
+          <li class="help-step">
+            <div class="help-step-body">
+              <h4>Enjoy, fresh &amp; fast</h4>
+              <p>We'll seat you or call your name - ready in about 20 minutes.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="help-modal-foot">
+      <div class="help-modal-actions">
+        <a href="menu.html" class="btn btn-outline-dark js-help-menu-link">
+          <svg class="icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
+          Browse Menu
+        </a>
+        <a href="#cart" class="btn btn-gold js-cart-trigger">
+          <svg class="icon" aria-hidden="true"><use href="#icon-cart"></use></svg>
+          View Cart
+        </a>
+      </div>
+      <a href="tel:+251912345678" class="help-modal-call">
+        <svg class="icon" aria-hidden="true"><use href="#icon-help"></use></svg>
+        0912 345 678
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SHARE AN IDEA MODAL (floats over any page) ============ -->
+<div class="idea-modal-overlay" id="idea-modal-overlay">
+  <div class="idea-modal" role="dialog" aria-modal="true" aria-labelledby="idea-modal-title">
+    <button type="button" class="idea-modal-close" id="idea-modal-close" aria-label="Close share an idea panel">
+      <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+    </button>
+
+    <div class="idea-modal-head">
+      <span class="idea-modal-icon"><svg class="icon" aria-hidden="true"><use href="#icon-idea"></use></svg></span>
+      <div>
+        <p class="idea-modal-eyebrow">Got a Suggestion?</p>
+        <h2 id="idea-modal-title">Share an Idea</h2>
+        <p>New menu item, feedback on the site, anything - we're listening.</p>
+      </div>
+    </div>
+
+    <form class="idea-form" id="idea-form" novalidate>
+      <div class="form-field">
+        <label for="idea-name">Your Name</label>
+        <input class="form-input" type="text" id="idea-name" name="name" placeholder="e.g. Bethlehem" autocomplete="name" required>
+      </div>
+
+      <div class="form-field">
+        <label for="idea-email">Email</label>
+        <input class="form-input" type="email" id="idea-email" name="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+
+      <div class="form-field">
+        <label for="idea-category">Category</label>
+        <select class="form-input" id="idea-category" name="category" required>
+          <option value="" disabled selected>Select a category</option>
+          <option value="menu">New Menu Item</option>
+          <option value="delivery">Delivery Experience</option>
+          <option value="website">Website / App</option>
+          <option value="service">In-Cafe Service</option>
+          <option value="other">Something Else</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="idea-message">Your Idea</label>
+        <textarea class="form-textarea" id="idea-message" name="message" placeholder="Tell us what's on your mind..." required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-gold idea-form-submit">
+        <svg class="icon" aria-hidden="true"><use href="#icon-idea"></use></svg>
+        Send Idea
+      </button>
+    </form>
+
+    <div class="idea-form-success" id="idea-form-success">
+      <span class="idea-form-success-icon"><svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg></span>
+      <h3>Thanks for sharing!</h3>
+      <p>We've got your idea and we genuinely read every one of these.</p>
+      <button type="button" class="btn btn-outline-dark js-idea-close">Close</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

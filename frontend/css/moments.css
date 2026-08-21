@@ -1,0 +1,84 @@
+/* ==========================================================================
+   MOMENTS SECTION - a row of short, silent, looping video clips giving a
+   feel for the cafe (baristas, guests, the counter) at a glance. Sits on
+   the homepage right after the "Why Success Cafe" feature cards. Videos
+   are muted/loop/playsinline so they autoplay inline on every browser
+   without a click, and js/moments.js pauses whichever ones scroll out of
+   view to keep things light.
+   ========================================================================== */
+
+.moments-section {
+  background: var(--cream);
+  padding: 88px 0 96px;
+}
+
+.moments-head {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.moments-head h2 {
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  margin: 0;
+}
+.moments-head h2 .accent {
+  color: var(--gold-600);
+}
+.moments-head h2 .moments-heading-am {
+  font-family: var(--font-amharic);
+  font-weight: 500;
+  color: var(--gold-600);
+}
+
+.moments-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.moment-video {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--forest-950);
+  box-shadow: var(--shadow-soft);
+}
+
+.moment-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 980px) {
+  .moments-row { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .moment-video:nth-child(n+4) { display: none; }
+}
+
+@media (max-width: 640px) {
+  .moments-section { padding: 64px 0 72px; }
+  .moments-row {
+    display: flex;
+    grid-template-columns: none;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 2px 18px 6px;
+    margin: 0 -18px;
+    scrollbar-width: none;
+  }
+  .moments-row::-webkit-scrollbar { display: none; }
+  .moment-video {
+    flex: 0 0 auto;
+    width: 42vw;
+    scroll-snap-align: start;
+    display: block !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .moment-video { width: 56vw; }
+}

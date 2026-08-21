@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - Success Cafe</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<div class="admin-shell">
+  <div class="login-wrap">
+    <div class="login-card">
+      <p class="eyebrow">Success Cafe &middot; Durame</p>
+      <h1>Admin Sign In</h1>
+
+      <div class="login-error" id="login-error"></div>
+
+      <form id="login-form">
+        <div class="login-field">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" autocomplete="username" required>
+        </div>
+        <div class="login-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="login-submit" id="login-submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="js/admin-login.js"></script>
+</body>
+</html>

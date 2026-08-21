@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orders - Success Cafe Admin</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<div class="admin-shell">
+
+  <header class="admin-header">
+    <div class="admin-brand">
+      <h1>Success Cafe</h1>
+      <span>Admin</span>
+    </div>
+    <div class="admin-header-right">
+      <span id="admin-username-label"></span>
+      <button type="button" class="admin-logout-btn" id="logout-btn">Sign Out</button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <div class="admin-tabs" id="status-tabs">
+      <button type="button" class="admin-tab is-active" data-status="pending_verification">Awaiting Verification</button>
+      <button type="button" class="admin-tab" data-status="verified">Verified</button>
+      <button type="button" class="admin-tab" data-status="confirmed">Confirmed (Cash)</button>
+      <button type="button" class="admin-tab" data-status="completed">Completed</button>
+      <button type="button" class="admin-tab" data-status="rejected">Rejected</button>
+      <button type="button" class="admin-tab" data-status="">All Orders</button>
+    </div>
+
+    <div class="orders-table-wrap">
+      <table class="orders-table" id="orders-table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Fulfillment</th>
+            <th>Payment</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Placed</th>
+          </tr>
+        </thead>
+        <tbody id="orders-tbody"></tbody>
+      </table>
+      <div class="empty-state" id="orders-empty" style="display:none;">No orders here yet.</div>
+    </div>
+  </main>
+</div>
+
+<!-- Order detail drawer -->
+<div class="drawer-overlay" id="drawer-overlay">
+  <aside class="drawer-panel" id="drawer-panel">
+    <button type="button" class="drawer-close" id="drawer-close" aria-label="Close">&times;</button>
+    <div id="drawer-content"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/admin-dashboard.js"></script>
+</body>
+</html>

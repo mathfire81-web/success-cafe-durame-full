@@ -1,0 +1,345 @@
+/* ==========================================================================
+   CART DRAWER - floats over whatever page the person is on, sliding in
+   from the right edge. There is no separate cart page; every cart link
+   or icon site-wide (".js-cart-trigger") opens this panel instead.
+   ========================================================================== */
+
+.cart-drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  background: rgba(11, 42, 31, 0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.cart-drawer-overlay.is-open {
+  display: block;
+  animation: cd-fade-in 0.18s ease;
+}
+
+@keyframes cd-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cart-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 211;
+  width: 100%;
+  max-width: 440px;
+  background: var(--cream);
+  box-shadow: -30px 0 60px -18px rgba(0,0,0,0.45);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(.2,.8,.3,1);
+}
+.cart-drawer-overlay.is-open .cart-drawer { transform: translateX(0); }
+
+/* ---- Head: matches the delivery modal's header pattern exactly -
+   cream background, gold eyebrow, forest heading, muted close button -
+   instead of a borrowed dark bar. ---- */
+.cart-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 26px 0;
+  flex: none;
+}
+
+.cart-drawer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-drawer-mark {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--forest-800);
+  border: 2px solid var(--gold-500);
+  box-shadow: 0 0 0 3px rgba(224, 186, 99, 0.16);
+}
+.cart-drawer-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.cart-drawer-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-600);
+  margin: 0 0 4px;
+}
+
+.cart-drawer-head h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.55rem;
+  color: var(--forest-950);
+  margin: 0;
+}
+
+.cart-drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cream-2);
+  color: var(--forest-950);
+  cursor: pointer;
+  flex: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.cart-drawer-close:hover { background: var(--gold-200); }
+.cart-drawer-close:active { transform: scale(0.9); }
+.cart-drawer-close .icon { width: 16px; height: 16px; }
+
+/* ---- Scrollable body ---- */
+.cart-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 26px 6px;
+  margin-top: 16px;
+  border-top: 1px dashed rgba(11, 42, 31, 0.15);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 42, 31, 0.25) transparent;
+}
+.cart-drawer-body::-webkit-scrollbar { width: 8px; }
+.cart-drawer-body::-webkit-scrollbar-track { background: transparent; }
+.cart-drawer-body::-webkit-scrollbar-thumb {
+  background: rgba(11, 42, 31, 0.22);
+  border-radius: 999px;
+}
+
+/* ---- Item rows: dashed dividers, matching the delivery modal's
+   zone-row / food-picker-item pattern instead of a solid line. ---- */
+.cart-drawer .cart-items-list { list-style: none; margin: 0; padding: 0; }
+
+.cart-drawer .cart-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px dashed rgba(11, 42, 31, 0.15);
+}
+.cart-drawer .cart-item:last-child { border-bottom: none; }
+
+.cart-drawer .cart-item-media {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--cream-2);
+}
+.cart-drawer .cart-item-media img { width: 100%; height: 100%; object-fit: cover; }
+
+.cart-drawer .cart-item-info { flex: 1 1 auto; min-width: 0; }
+.cart-drawer .cart-item-info h3 {
+  font-family: var(--font-body);
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--forest-950);
+  margin: 0 0 4px;
+}
+.cart-drawer .cart-item-unit-price {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gold-700);
+  margin: 0 0 10px;
+}
+
+.cart-drawer .cart-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cart-drawer .qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--cream-2);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+}
+.cart-drawer .qty-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: var(--white);
+  color: var(--gold-700);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(11, 42, 31, 0.14);
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+.cart-drawer .qty-btn:hover { background: var(--gold-200); }
+.cart-drawer .qty-btn:active { transform: scale(0.9); }
+.cart-drawer .qty-value {
+  min-width: 14px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--forest-950);
+}
+
+.cart-drawer .cart-item-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--gold-700);
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+.cart-drawer .cart-item-remove:hover { color: #a5341f; transform: scale(1.08); }
+.cart-drawer .cart-item-remove .icon { width: 19px; height: 19px; stroke-width: 2; }
+
+/* ---- Empty state ---- */
+.cart-drawer .cart-empty {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 50px 0 30px;
+}
+.cart-drawer .cart-empty.is-visible { display: flex; }
+.cart-drawer .cart-items-list.is-hidden { display: none; }
+.cart-drawer .cart-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--forest-100);
+  color: var(--forest-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cart-drawer .cart-empty-icon .icon { width: 22px; height: 22px; }
+.cart-drawer .cart-empty h3 { font-size: 1.2rem; margin: 0; }
+
+/* ---- Action buttons (Checkout / Browse the Menu) reuse the site's
+   actual .btn .btn-gold classes used everywhere else - this just adds
+   full width for the drawer's footer/empty-state context. ---- */
+.cart-drawer-btn-full {
+  width: 100%;
+}
+.cart-drawer-btn-full[aria-disabled="true"] { opacity: 0.5; pointer-events: none; }
+
+/* ---- Sticky footer: Total + Checkout ---- */
+.cart-drawer-foot {
+  flex: none;
+  padding: 20px 26px calc(22px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px dashed rgba(11, 42, 31, 0.15);
+  background: var(--cream);
+}
+.cart-drawer-foot.is-hidden { display: none; }
+
+/* ---- Fulfillment badge: shows the cart differently for a delivery
+   order (built via the delivery panel's food picker) vs. an in-cafe
+   order (added straight from a menu grid) - see js/cart-drawer.js. ---- */
+.cart-drawer-fulfillment-badge {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.cart-drawer-fulfillment-badge .icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+.cart-drawer-fulfillment-badge.is-delivery {
+  background: var(--gold-200);
+  color: var(--gold-700);
+}
+.cart-drawer-fulfillment-badge.is-in-cafe {
+  background: var(--forest-100);
+  color: var(--forest-700);
+}
+.cart-drawer-fulfillment-badge span {
+  margin-right: auto;
+}
+.cart-drawer-switch-delivery {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--forest-700);
+  cursor: pointer;
+}
+.cart-drawer-switch-delivery:hover { color: var(--gold-700); }
+
+.cart-drawer-total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.cart-drawer-total-row span:first-child {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--forest-950);
+}
+.cart-drawer-total-row span:last-child {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold-700);
+}
+
+/* ---- Responsive: phones get a bottom sheet covering ~90% of the
+   screen (not the full page), with rounded top corners; still slides
+   in from the right like on desktop. ---- */
+@media (max-width: 640px) {
+  .cart-drawer {
+    top: auto;
+    bottom: 0;
+    height: 90vh;
+    max-height: 90vh;
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    box-shadow: 0 -20px 50px -16px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .cart-drawer-head {
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-drawer { max-width: 100%; }
+  .cart-drawer-head { padding: 18px 20px; }
+  .cart-drawer-body { padding: 4px 20px; }
+  .cart-drawer-foot { padding: 16px 20px calc(18px + env(safe-area-inset-bottom, 0px)); }
+}

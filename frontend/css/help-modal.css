@@ -1,0 +1,257 @@
+/* ==========================================================================
+   HELP MODAL - floats over whatever page the person is on, opened by the
+   "?" helper button (or any ".js-help-trigger"). Walks through how to
+   order for delivery vs. how to order in the cafe, then hands off to
+   the Menu / Cart. Shares the delivery modal's overlay/close chrome so
+   the two floating panels feel like one family.
+   ========================================================================== */
+
+.help-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  background: rgba(11, 42, 31, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.help-modal-overlay.is-open {
+  display: flex;
+  animation: hm-fade-in 0.18s ease;
+}
+
+@keyframes hm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.help-modal {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: var(--cream);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
+  padding: 36px 36px 28px;
+  animation: hm-pop-in 0.22s cubic-bezier(.2, .8, .3, 1.1);
+}
+
+@keyframes hm-pop-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.help-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cream-2);
+  color: var(--forest-950);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.help-modal-close:hover { background: var(--gold-200); }
+.help-modal-close:active { transform: scale(0.9); }
+.help-modal-close .icon { width: 16px; height: 16px; }
+
+.help-modal-head { padding-right: 34px; margin-bottom: 26px; }
+.help-modal-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-600);
+  margin: 0 0 6px;
+}
+.help-modal-head h2 {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  margin: 0 0 8px;
+}
+.help-modal-head p {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 56ch;
+}
+
+/* ---- Two "how to order" columns ---- */
+.help-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.help-col {
+  background: var(--white);
+  border: 1px solid rgba(11, 42, 31, 0.08);
+  border-radius: var(--radius-md);
+  padding: 24px 22px;
+}
+
+.help-col-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.help-col-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--forest-950);
+  color: var(--gold-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.help-col-icon .icon { width: 20px; height: 20px; }
+
+.help-col-head h3 {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  margin: 0 0 2px;
+  color: var(--forest-950);
+}
+.help-col-head span {
+  font-size: 0.78rem;
+  color: var(--gold-700);
+  font-weight: 600;
+}
+
+.help-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: help-step;
+}
+
+.help-step {
+  position: relative;
+  counter-increment: help-step;
+  display: flex;
+  gap: 14px;
+  padding: 0 0 18px 0;
+}
+.help-step:last-child { padding-bottom: 0; }
+
+.help-step::before {
+  content: counter(help-step);
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-500);
+  color: var(--gold-700);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+
+.help-step-line {
+  position: absolute;
+  left: 12.5px;
+  top: 28px;
+  bottom: -2px;
+  width: 1.5px;
+  background: rgba(11, 42, 31, 0.12);
+}
+.help-step:last-child .help-step-line { display: none; }
+
+.help-step-body h4 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--forest-950);
+  margin: 0 0 3px;
+}
+.help-step-body p {
+  font-size: 0.86rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ---- Footer ---- */
+.help-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px dashed rgba(11, 42, 31, 0.15);
+}
+
+.help-modal-actions {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+.help-modal-actions .btn { flex: 1; }
+.help-modal-actions .icon { width: 17px; height: 17px; stroke-width: 2; }
+
+.help-modal-call {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--forest-800);
+  white-space: nowrap;
+}
+.help-modal-call .icon { width: 16px; height: 16px; color: var(--gold-600); }
+.help-modal-call:hover { color: var(--gold-700); }
+
+/* ---- Body lock while modal is open ---- */
+body.help-modal-open { overflow: hidden; }
+
+/* ---- Responsive: bottom-sheet on phones, matches the delivery modal ---- */
+@media (max-width: 720px) {
+  .help-columns { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .help-modal-overlay { padding: 0; align-items: flex-end; }
+  .help-modal {
+    max-width: none;
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 24px 24px 0 0;
+    padding: 26px 20px 22px;
+    padding-bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  }
+  .help-modal-overlay.is-open .help-modal {
+    animation: hm-sheet-up 0.22s cubic-bezier(.2, .8, .3, 1.1);
+  }
+  .help-modal-foot { flex-direction: column; align-items: stretch; }
+  .help-modal-call { justify-content: center; }
+}
+
+@keyframes hm-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@media (max-width: 400px) {
+  .help-modal-head h2 { font-size: 1.35rem; }
+  .help-modal-actions { flex-direction: column; }
+}
