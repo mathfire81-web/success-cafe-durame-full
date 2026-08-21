@@ -9,10 +9,10 @@ document.addEventListener("DOMContentLoaded", function () {
     submitBtn.disabled = true;
     submitBtn.textContent = "Signing in...";
 
-    fetch("/api/admin/auth/login", {
+    fetch((window.API_BASE_URL || "") + "/api/admin/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
+      credentials: "include",
       body: JSON.stringify({
         username: document.getElementById("username").value,
         password: document.getElementById("password").value

@@ -9,7 +9,11 @@ const router = express.Router();
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "lax",
+  // "none" is required for the cookie to be sent on cross-origin
+  // requests (admin dashboard on Vercel calling the API on Render).
+  // Cross-site cookies must also be Secure, hence tied to production
+  // here. In local dev (same-origin, http) "lax" + non-secure is used.
+  sameSite: config.nodeEnv === "production" ? "none" : "lax",
   secure: config.nodeEnv === "production",
   maxAge: 12 * 60 * 60 * 1000 // 12h, kept in sync with jwtExpiresIn's default
 };

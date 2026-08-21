@@ -35,8 +35,11 @@ function showToast(message) {
 
 function apiFetch(url, options) {
   options = options || {};
-  options.credentials = "same-origin";
-  return fetch(url, options).then(function (res) {
+  // "include" (not "same-origin") since the admin dashboard is on a
+  // different origin (Vercel) than the API (Render); the CORS setup
+  // on the backend allows this specific origin with credentials.
+  options.credentials = "include";
+  return fetch((window.API_BASE_URL || "") + url, options).then(function (res) {
     if (res.status === 401) {
       window.location.href = "login.html";
       throw new Error("Not signed in");
@@ -126,7 +129,7 @@ function renderDrawer(order) {
     : '<div class="drawer-row"><span>Fulfillment</span><span>In Cafe</span></div>';
 
   var proofHtml = order.hasProof
-    ? '<img class="proof-thumb" src="/api/admin/orders/' + order.id + '/proof" alt="Payment proof screenshot">'
+    ? '<img class="proof-thumb" crossorigin="use-credentials" src="' + (window.API_BASE_URL || "") + '/api/admin/orders/' + order.id + '/proof" alt="Payment proof screenshot">'
     : '<p class="no-proof">No screenshot uploaded (cash order).</p>';
 
   var actionsHtml = "";

@@ -15,6 +15,14 @@ module.exports = {
 
   databaseUrl: required("DATABASE_URL"),
 
+  // Comma-separated list of origins allowed to call the API with
+  // credentials (e.g. https://your-site.vercel.app). Empty = allow any
+  // origin (fine for local dev, tighten this in production).
+  allowedOrigins: (process.env.ALLOWED_ORIGIN || "")
+    .split(",")
+    .map(function (s) { return s.trim(); })
+    .filter(Boolean),
+
   jwtSecret: required("JWT_SECRET"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "12h",
 

@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const config = require("./config");
 
@@ -10,6 +11,22 @@ const adminOrdersRouter = require("./routes/adminOrders");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
+
+// ---- CORS ----
+// The frontend/admin dashboard are deployed on a different origin
+// (e.g. Vercel) than this API (e.g. Render), so cross-origin requests
+// need to be explicitly allowed - including credentials, since admin
+// auth relies on a cookie. Set ALLOWED_ORIGIN in the environment to a
+// comma-separated list of exact origins in production.
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || config.allowedOrigins.length === 0 || config.allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS: " + origin));
+  },
+  credentials: true
+}));
 
 app.use(cookieParser());
 app.use(express.json());

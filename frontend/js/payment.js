@@ -339,7 +339,7 @@ function submitOrder(fulfillment) {
   }
   if (paymentProofFile) formData.append("proof", paymentProofFile);
 
-  return fetch("/api/orders", { method: "POST", body: formData }).then(function (res) {
+  return fetch((window.API_BASE_URL || "") + "/api/orders", { method: "POST", body: formData }).then(function (res) {
     return res.json().then(function (data) {
       if (!res.ok) throw new Error(data.error || "Something went wrong placing your order.");
       return data;
