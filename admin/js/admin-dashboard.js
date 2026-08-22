@@ -15,6 +15,21 @@ var STATUS_LABELS = {
   completed: "Completed"
 };
 
+var PREORDER_STATUS_LABELS = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  cancelled: "Cancelled",
+  completed: "Completed"
+};
+
+var IDEA_CATEGORY_LABELS = {
+  menu: "Menu",
+  delivery: "Delivery",
+  website: "Website",
+  service: "Service",
+  other: "Other"
+};
+
 var VALID_STATUSES = ["pending_verification", "verified", "confirmed", "completed", "rejected"];
 
 var AVATAR_COLORS = ["#e2691f", "#1e5c40", "#4f8cff", "#23b3a3", "#b8541f", "#2c7350", "#c0392b", "#8a5cf6"];
@@ -30,7 +45,19 @@ var state = {
   range: 7,
   statsOrders: [],
   statusCounts: {},
-  lastFetchedAt: null
+  lastFetchedAt: null,
+
+  pstatus: "pending",
+  ppage: 1,
+  ppageSize: 10,
+  ptotal: 0,
+  preordersOnPage: [],
+  preorderStatusCounts: {},
+
+  ipage: 1,
+  ipageSize: 12,
+  itotal: 0,
+  ideasOnPage: []
 };
 
 /* ---------------- helpers ---------------- */
@@ -472,6 +499,270 @@ function exportCsv() {
   }).catch(function (err) { showToast(err.message); });
 }
 
+/* ---------------- generic pagination (ideas + preorders) ---------------- */
+
+function renderGenericPagination(summaryElId, controlsElId, page, pageSize, total, onPageChange) {
+  var summary = document.getElementById(summaryElId);
+  var controls = document.getElementById(controlsElId);
+  var totalPages = Math.max(1, Math.ceil(total / pageSize));
+  var from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  var to = Math.min(page * pageSize, total);
+  summary.textContent = "Showing " + from + " to " + to + " of " + total + " entries";
+
+  var html = '<button type="button" class="page-btn" data-page="' + (page - 1) + '" ' + (page <= 1 ? "disabled" : "") + '>&lsaquo;</button>';
+  var pages = [];
+  for (var p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || Math.abs(p - page) <= 1) pages.push(p);
+  }
+  var lastShown = 0;
+  pages.forEach(function (p) {
+    if (lastShown && p - lastShown > 1) html += '<span class="page-ellipsis">&hellip;</span>';
+    html += '<button type="button" class="page-btn ' + (p === page ? "is-active" : "") + '" data-page="' + p + '">' + p + "</button>";
+    lastShown = p;
+  });
+  html += '<button type="button" class="page-btn" data-page="' + (page + 1) + '" ' + (page >= totalPages ? "disabled" : "") + '>&rsaquo;</button>';
+  controls.innerHTML = html;
+
+  Array.prototype.forEach.call(controls.querySelectorAll(".page-btn:not([disabled])"), function (btn) {
+    btn.addEventListener("click", function () { onPageChange(parseInt(btn.getAttribute("data-page"), 10)); });
+  });
+}
+
+/* ---------------- pre-orders view ---------------- */
+
+var PREORDER_STATUSES = ["pending", "confirmed", "completed", "cancelled"];
+
+function loadPreorderStatusCounts() {
+  var calls = PREORDER_STATUSES.map(function (s) {
+    return apiFetch("/api/admin/preorders?status=" + s + "&pageSize=1").then(function (data) {
+      state.preorderStatusCounts[s] = data.total;
+    });
+  });
+  calls.push(apiFetch("/api/admin/preorders?pageSize=1").then(function (data) {
+    state.preorderStatusCounts.all = data.total;
+  }));
+  return Promise.all(calls).then(function () {
+    document.getElementById("badge-preorder-pending").textContent = state.preorderStatusCounts.pending || 0;
+    PREORDER_STATUSES.forEach(function (s) {
+      var el = document.getElementById("pcount-" + s);
+      if (el) el.textContent = state.preorderStatusCounts[s] != null ? "(" + state.preorderStatusCounts[s] + ")" : "";
+    });
+    var allEl = document.getElementById("pcount-all");
+    if (allEl) allEl.textContent = state.preorderStatusCounts.all != null ? "(" + state.preorderStatusCounts.all + ")" : "";
+  });
+}
+
+function setActivePreorderStatus(status) {
+  state.pstatus = status;
+  state.ppage = 1;
+  Array.prototype.forEach.call(document.querySelectorAll("#preorder-status-tabs .admin-tab"), function (t) {
+    t.classList.toggle("is-active", t.getAttribute("data-pstatus") === status);
+  });
+  loadPreordersPage();
+}
+
+function loadPreordersPage() {
+  var qs = "?pageSize=" + state.ppageSize + "&page=" + state.ppage;
+  if (state.pstatus) qs += "&status=" + encodeURIComponent(state.pstatus);
+  return apiFetch("/api/admin/preorders" + qs).then(function (data) {
+    state.preordersOnPage = data.preorders;
+    state.ptotal = data.total;
+    applyPreorderFiltersAndRender();
+    renderGenericPagination("preorders-pagination-summary", "preorders-pagination-controls", state.ppage, state.ppageSize, state.ptotal, function (p) {
+      state.ppage = p;
+      loadPreordersPage();
+    });
+    markUpdated();
+  });
+}
+
+function getFilteredPreorders() {
+  var text = (document.getElementById("preorders-search").value || "").toLowerCase().trim();
+  if (!text) return state.preordersOnPage;
+  return state.preordersOnPage.filter(function (p) {
+    var hay = (p.preorderCode + " " + p.customerName + " " + p.customerPhone).toLowerCase();
+    return hay.indexOf(text) !== -1;
+  });
+}
+
+function applyPreorderFiltersAndRender() {
+  renderPreordersTable(getFilteredPreorders());
+}
+
+function renderPreordersTable(preorders) {
+  var tbody = document.getElementById("preorders-tbody");
+  var empty = document.getElementById("preorders-empty");
+  var table = document.getElementById("preorders-table");
+
+  if (!preorders.length) {
+    tbody.innerHTML = "";
+    table.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+  table.style.display = "";
+  empty.style.display = "none";
+
+  tbody.innerHTML = preorders.map(function (p) {
+    var when = p.reservationDate ? formatShortDate(new Date(p.reservationDate)) + (p.reservationTime ? " \u00b7 " + p.reservationTime : "") : "\u2014";
+    return (
+      '<tr data-preorder-id="' + p.id + '">' +
+        '<td class="order-code-cell">' + p.preorderCode + "</td>" +
+        '<td><div class="cust-cell"><span class="avatar-badge" style="background:' + colorFor(p.customerName) + '">' + initialsFor(p.customerName) + "</span>" +
+          "<span>" + escapeHtml(p.customerName) + "<br><small>" + escapeHtml(p.customerPhone) + "</small></span></div></td>" +
+        "<td>" + when + "</td>" +
+        "<td>" + p.guests + "</td>" +
+        "<td>" + (p.itemCount > 0 ? p.itemCount + " item(s)" : "Decide on arrival") + "</td>" +
+        '<td><span class="status-pill status-' + p.status + '">' + (PREORDER_STATUS_LABELS[p.status] || p.status) + "</span></td>" +
+        "<td>" + formatDate(p.createdAt) + "</td>" +
+        '<td><button type="button" class="row-view-btn" data-id="' + p.id + '" title="View"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button></td>' +
+      "</tr>"
+    );
+  }).join("");
+}
+
+function openPreorderDrawer(id) {
+  apiFetch("/api/admin/preorders/" + id).then(function (preorder) {
+    renderPreorderDrawer(preorder);
+    document.getElementById("drawer-overlay").classList.add("is-open");
+  }).catch(function (err) { showToast(err.message); });
+}
+
+function renderPreorderDrawer(p) {
+  var content = document.getElementById("drawer-content");
+
+  var itemsHtml = p.items.length
+    ? p.items.map(function (item) {
+        return "<li><span>" + item.qty + "&times; " + escapeHtml(item.name) + "</span><span>" + formatMoney(item.lineTotal) + "</span></li>";
+      }).join("")
+    : "<li><span>No food selected \u2014 deciding on arrival</span></li>";
+
+  var when = p.reservationDate ? formatShortDate(new Date(p.reservationDate)) + (p.reservationTime ? " at " + p.reservationTime : "") : "\u2014";
+
+  var actionsHtml = "";
+  if (p.status === "pending") {
+    actionsHtml =
+      '<textarea class="drawer-note" id="preorder-note" placeholder="Note (optional)"></textarea>' +
+      '<div class="drawer-actions">' +
+        '<button type="button" class="drawer-btn reject" id="preorder-cancel-btn">Cancel</button>' +
+        '<button type="button" class="drawer-btn verify" id="preorder-confirm-btn">Confirm</button>' +
+      "</div>";
+  } else if (p.status === "confirmed") {
+    actionsHtml =
+      '<textarea class="drawer-note" id="preorder-note" placeholder="Note (optional)"></textarea>' +
+      '<div class="drawer-actions">' +
+        '<button type="button" class="drawer-btn reject" id="preorder-cancel-btn">Cancel</button>' +
+        '<button type="button" class="drawer-btn complete" id="preorder-complete-btn">Mark Completed</button>' +
+      "</div>";
+  }
+
+  content.innerHTML =
+    "<h2>" + p.preorderCode + "</h2>" +
+    '<p class="drawer-sub"><span class="status-pill status-' + p.status + '">' + (PREORDER_STATUS_LABELS[p.status] || p.status) + "</span> &middot; " + formatDate(p.createdAt) + "</p>" +
+
+    '<div class="drawer-section"><h3>Customer</h3>' +
+      '<div class="drawer-row"><span>Name</span><span>' + escapeHtml(p.customerName) + "</span></div>" +
+      '<div class="drawer-row"><span>Phone</span><span>' + escapeHtml(p.customerPhone) + "</span></div>" +
+      '<div class="drawer-row"><span>Table for</span><span>' + p.guests + "</span></div>" +
+      '<div class="drawer-row"><span>Reservation</span><span>' + when + "</span></div>" +
+    "</div>" +
+
+    '<div class="drawer-section"><h3>Food</h3><ul class="drawer-items">' + itemsHtml + "</ul>" +
+      (p.items.length ? '<div class="drawer-row" style="margin-top:8px; border-top:1px solid rgba(245,241,230,0.1); padding-top:8px;"><span>Subtotal</span><span>' + formatMoney(p.subtotal) + "</span></div>" : "") +
+    "</div>" +
+
+    (p.notes ? '<div class="drawer-section"><h3>Special Requests</h3><p style="margin:0; font-size:0.88rem;">' + escapeHtml(p.notes) + "</p></div>" : "") +
+    (p.adminNote ? '<div class="drawer-section"><h3>Admin Note</h3><p style="margin:0; font-size:0.88rem;">' + escapeHtml(p.adminNote) + "</p></div>" : "") +
+
+    actionsHtml;
+
+  var confirmBtn = document.getElementById("preorder-confirm-btn");
+  var cancelBtn = document.getElementById("preorder-cancel-btn");
+  var completeBtn = document.getElementById("preorder-complete-btn");
+
+  if (confirmBtn) confirmBtn.addEventListener("click", function () { runPreorderAction(p.id, "confirmed"); });
+  if (cancelBtn) cancelBtn.addEventListener("click", function () { runPreorderAction(p.id, "cancelled"); });
+  if (completeBtn) completeBtn.addEventListener("click", function () { runPreorderAction(p.id, "completed"); });
+}
+
+function runPreorderAction(id, status) {
+  var noteEl = document.getElementById("preorder-note");
+  apiFetch("/api/admin/preorders/" + id + "/status", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: status, note: noteEl ? noteEl.value : "" })
+  }).then(function () {
+    showToast("Reservation " + status + ".");
+    closeDrawer();
+    if (state.view === "preorders") loadPreordersPage();
+    loadPreorderStatusCounts();
+  }).catch(function (err) { showToast(err.message); });
+}
+
+/* ---------------- ideas view ---------------- */
+
+function loadIdeasPage() {
+  var qs = "?pageSize=" + state.ipageSize + "&page=" + state.ipage;
+  return apiFetch("/api/admin/ideas" + qs).then(function (data) {
+    state.ideasOnPage = data.ideas;
+    state.itotal = data.total;
+    document.getElementById("badge-ideas-total").textContent = data.total;
+    applyIdeaFiltersAndRender();
+    renderGenericPagination("ideas-pagination-summary", "ideas-pagination-controls", state.ipage, state.ipageSize, state.itotal, function (p) {
+      state.ipage = p;
+      loadIdeasPage();
+    });
+    markUpdated();
+  });
+}
+
+function getFilteredIdeas() {
+  var text = (document.getElementById("ideas-search").value || "").toLowerCase().trim();
+  var category = document.getElementById("filter-idea-category").value;
+  return state.ideasOnPage.filter(function (idea) {
+    if (category && idea.category !== category) return false;
+    if (text) {
+      var hay = (idea.name + " " + idea.email + " " + idea.message).toLowerCase();
+      if (hay.indexOf(text) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function applyIdeaFiltersAndRender() {
+  renderIdeasGrid(getFilteredIdeas());
+}
+
+function renderIdeasGrid(ideas) {
+  var grid = document.getElementById("ideas-grid");
+  var empty = document.getElementById("ideas-empty");
+
+  if (!ideas.length) {
+    grid.innerHTML = "";
+    grid.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+  grid.style.display = "";
+  empty.style.display = "none";
+
+  grid.innerHTML = ideas.map(function (idea) {
+    return (
+      '<div class="idea-card">' +
+        '<div class="idea-card-head">' +
+          '<div class="idea-card-who">' +
+            '<span class="idea-card-name">' + escapeHtml(idea.name) + "</span>" +
+            '<span class="idea-card-email">' + escapeHtml(idea.email) + "</span>" +
+          "</div>" +
+          '<span class="idea-cat cat-' + idea.category + '">' + (IDEA_CATEGORY_LABELS[idea.category] || idea.category) + "</span>" +
+        "</div>" +
+        '<p class="idea-card-message">' + escapeHtml(idea.message) + "</p>" +
+        '<span class="idea-card-date">' + formatDate(idea.createdAt) + "</span>" +
+      "</div>"
+    );
+  }).join("");
+}
+
 /* ---------------- detail drawer ---------------- */
 
 function openDrawer(orderId) {
@@ -569,7 +860,10 @@ function switchView(view, status) {
   state.view = view;
   document.getElementById("view-dashboard").style.display = view === "dashboard" ? "" : "none";
   document.getElementById("view-orders").style.display = view === "orders" ? "" : "none";
-  document.getElementById("header-title").textContent = view === "dashboard" ? "Dashboard" : "Orders";
+  document.getElementById("view-preorders").style.display = view === "preorders" ? "" : "none";
+  document.getElementById("view-ideas").style.display = view === "ideas" ? "" : "none";
+  document.getElementById("header-title").textContent =
+    view === "dashboard" ? "Dashboard" : (view === "orders" ? "Orders" : (view === "preorders" ? "Pre-Orders" : "Ideas"));
 
   Array.prototype.forEach.call(document.querySelectorAll(".sb-link[data-view]"), function (link) {
     link.classList.toggle("is-active", link.getAttribute("data-view") === view && !link.classList.contains("sb-link--sub"));
@@ -578,6 +872,11 @@ function switchView(view, status) {
   if (view === "orders") {
     if (status !== undefined) setActiveStatus(status);
     else loadOrdersPage();
+  } else if (view === "preorders") {
+    loadPreordersPage();
+    loadPreorderStatusCounts();
+  } else if (view === "ideas") {
+    loadIdeasPage();
   }
   closeSidebarMobile();
 }
@@ -601,6 +900,7 @@ function closeSidebarMobile() {
 document.addEventListener("DOMContentLoaded", function () {
   checkAuth()
     .then(function () { return loadStatusCounts(); })
+    .then(function () { return loadPreorderStatusCounts(); })
     .then(function () { return loadStatsOrders(); })
     .then(function () { markUpdated(); })
     .catch(function () { /* checkAuth already redirects on 401 */ });
@@ -716,4 +1016,24 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("drawer-overlay").addEventListener("click", function (event) {
     if (event.target === document.getElementById("drawer-overlay")) closeDrawer();
   });
+
+  /* Pre-orders: status tabs, search, refresh, row click opens drawer */
+  document.getElementById("preorder-status-tabs").addEventListener("click", function (event) {
+    var btn = event.target.closest(".admin-tab");
+    if (!btn) return;
+    setActivePreorderStatus(btn.getAttribute("data-pstatus"));
+  });
+  document.getElementById("preorders-search").addEventListener("input", applyPreorderFiltersAndRender);
+  document.getElementById("refresh-preorders-btn").addEventListener("click", function () { loadPreordersPage(); loadPreorderStatusCounts(); });
+  document.getElementById("preorders-tbody").addEventListener("click", function (event) {
+    var viewBtn = event.target.closest(".row-view-btn");
+    if (viewBtn) { event.stopPropagation(); openPreorderDrawer(viewBtn.getAttribute("data-id")); return; }
+    var row = event.target.closest("tr");
+    if (row) openPreorderDrawer(row.getAttribute("data-preorder-id"));
+  });
+
+  /* Ideas: search, category filter, refresh */
+  document.getElementById("ideas-search").addEventListener("input", applyIdeaFiltersAndRender);
+  document.getElementById("filter-idea-category").addEventListener("change", applyIdeaFiltersAndRender);
+  document.getElementById("refresh-ideas-btn").addEventListener("click", loadIdeasPage);
 });

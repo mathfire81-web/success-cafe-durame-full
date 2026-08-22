@@ -6,7 +6,12 @@ const config = require("../config");
 const MIGRATIONS_DIR = path.join(__dirname, "..", "migrations");
 
 async function run() {
-  const pool = new Pool({ connectionString: config.databaseUrl });
+  const pool = new Pool({
+    connectionString: config.databaseUrl,
+    ssl: /supabase\.co|sslmode=require/i.test(config.databaseUrl)
+      ? { rejectUnauthorized: false }
+      : false
+  });
 
   await pool.query(
     `CREATE TABLE IF NOT EXISTS schema_migrations (

@@ -1,5 +1,8 @@
 /*
-  API_BASE_URL - the deployed backend's origin (Render), e.g.
-  "https://success-cafe-durame-full.onrender.com". No trailing slash.
+  API_BASE_URL - where the admin dashboard sends API requests.
+
+  Served from the exact same Express app/origin as the API (see
+  backend/src/server.js), so this should always just be "" (same
+  origin as the page) - never a hardcoded URL.
 */
-window.API_BASE_URL = "https://success-cafe-durame-full.onrender.com";
+window.API_BASE_URL = "";

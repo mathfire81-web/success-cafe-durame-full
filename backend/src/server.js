@@ -6,8 +6,12 @@ const config = require("./config");
 const menuRouter = require("./routes/menu");
 const deliveryLandmarksRouter = require("./routes/deliveryLandmarks");
 const ordersRouter = require("./routes/orders");
+const ideasRouter = require("./routes/ideas");
+const preordersRouter = require("./routes/preorders");
 const adminAuthRouter = require("./routes/adminAuth");
 const adminOrdersRouter = require("./routes/adminOrders");
+const adminIdeasRouter = require("./routes/adminIdeas");
+const adminPreordersRouter = require("./routes/adminPreorders");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
@@ -35,8 +39,12 @@ app.use(express.json());
 app.use("/api/menu", menuRouter);
 app.use("/api/delivery-landmarks", deliveryLandmarksRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/ideas", ideasRouter);
+app.use("/api/preorders", preordersRouter);
 app.use("/api/admin/auth", adminAuthRouter);
 app.use("/api/admin/orders", adminOrdersRouter);
+app.use("/api/admin/ideas", adminIdeasRouter);
+app.use("/api/admin/preorders", adminPreordersRouter);
 
 // ---- Admin dashboard (static; its own JS guards each page with
 // GET /api/admin/auth/me and redirects to login when unauthenticated) ----

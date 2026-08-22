@@ -5,9 +5,11 @@
   This is a separate flow from the shopping cart - quantities picked
   here live in their own local state (poQty) and are NOT added to
   SuccessCafeCart, since a pre-order is "have this ready for my table"
-  rather than a delivery/pickup checkout. Front-end only for now: on
-  submit it validates the fields and swaps in a confirmation, the same
-  pattern used by js/idea-modal.js.
+  rather than a delivery/pickup checkout. It's also free/unpaid - a
+  reservation, not a purchase. On submit this POSTs to /api/preorders
+  (see js/api-config.js for API_BASE_URL), same fetch pattern as
+  js/payment.js and js/idea-modal.js, and only shows the confirmation
+  once the server confirms it saved.
 */
 
 var poQty = {};
@@ -110,6 +112,10 @@ document.addEventListener("DOMContentLoaded", function () {
       form.style.display = "";
     }
     if (successPanel) successPanel.classList.remove("is-visible");
+    var errorEl = document.getElementById("preorder-form-error");
+    if (errorEl) errorEl.style.display = "none";
+    var submitBtn = document.getElementById("preorder-form-submit-btn");
+    if (submitBtn) submitBtn.disabled = false;
     poRenderList();
     poUpdateSummaryBar();
   }
@@ -170,9 +176,53 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  /* Front-end only for now: no backend to send this to yet, so
-     confirming just validates the fields and swaps in a reservation
-     confirmation with what was entered. */
+  var submitBtn = document.getElementById("preorder-form-submit-btn");
+  var submitLabel = submitBtn ? submitBtn.querySelector(".preorder-form-submit-label") : null;
+
+  function showPreorderError(message) {
+    var errorEl = document.getElementById("preorder-form-error");
+    if (!errorEl) return;
+    errorEl.textContent = message;
+    errorEl.style.display = "";
+  }
+
+  function clearPreorderError() {
+    var errorEl = document.getElementById("preorder-form-error");
+    if (errorEl) errorEl.style.display = "none";
+  }
+
+  function poBuildItemsPayload() {
+    var items = [];
+    Object.keys(poQty).forEach(function (id) {
+      if (poQty[id] > 0) items.push({ id: id, qty: poQty[id] });
+    });
+    return items;
+  }
+
+  function submitPreorder(name, phone, date, time, guests, notes) {
+    return fetch((window.API_BASE_URL || "") + "/api/preorders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: name,
+        phone: phone,
+        date: date,
+        time: time,
+        guests: guests,
+        notes: notes,
+        items: poBuildItemsPayload()
+      })
+    }).then(function (res) {
+      return res.json().then(function (data) {
+        if (!res.ok) throw new Error(data.error || "Something went wrong sending your reservation.");
+        return data;
+      });
+    });
+  }
+
+  /* Validates locally first (same as before), then sends the
+     reservation + any food picked to the server and only shows the
+     confirmation once it's actually saved. */
   if (form) {
     form.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -182,23 +232,41 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       var name = document.getElementById("preorder-name").value.trim();
+      var phone = document.getElementById("preorder-phone").value.trim();
       var date = document.getElementById("preorder-date").value;
       var time = document.getElementById("preorder-time").value;
       var guests = document.getElementById("preorder-guests").value;
+      var notesField = document.getElementById("preorder-notes");
+      var notes = notesField ? notesField.value.trim() : "";
       var totals = poGetTotals();
 
-      var details = document.getElementById("preorder-form-success-details");
-      if (details) {
-        details.innerHTML =
-          '<span><strong>Table for:</strong> ' + guests + '</span>' +
-          '<span><strong>Date &amp; time:</strong> ' + date + (time ? " at " + time : "") + '</span>' +
-          '<span><strong>Food ready for you:</strong> ' + (totals.count > 0 ? totals.count + " item(s), " + poFormatPrice(totals.total) : "Decide when you arrive") + '</span>';
-      }
-      var successName = document.getElementById("preorder-success-name");
-      if (successName) successName.textContent = name ? name + ", " : "";
+      clearPreorderError();
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitLabel) submitLabel.textContent = "Sending...";
 
-      form.style.display = "none";
-      if (successPanel) successPanel.classList.add("is-visible");
+      submitPreorder(name, phone, date, time, guests, notes)
+        .then(function (result) {
+          var details = document.getElementById("preorder-form-success-details");
+          if (details) {
+            details.innerHTML =
+              '<span><strong>Reservation code:</strong> ' + result.preorderCode + '</span>' +
+              '<span><strong>Table for:</strong> ' + guests + '</span>' +
+              '<span><strong>Date &amp; time:</strong> ' + date + (time ? " at " + time : "") + '</span>' +
+              '<span><strong>Food ready for you:</strong> ' + (totals.count > 0 ? totals.count + " item(s), " + poFormatPrice(totals.total) : "Decide when you arrive") + '</span>';
+          }
+          var successName = document.getElementById("preorder-success-name");
+          if (successName) successName.textContent = name ? name + ", " : "";
+
+          form.style.display = "none";
+          if (successPanel) successPanel.classList.add("is-visible");
+        })
+        .catch(function (err) {
+          showPreorderError(err.message || "Something went wrong sending your reservation. Please try again.");
+        })
+        .then(function () {
+          if (submitBtn) submitBtn.disabled = false;
+          if (submitLabel) submitLabel.textContent = "Confirm (ያረጋግጡ)";
+        });
     });
   }
 

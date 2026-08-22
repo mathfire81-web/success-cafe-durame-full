@@ -1,7 +1,19 @@
 const { Pool } = require("pg");
 const config = require("./config");
 
-const pool = new Pool({ connectionString: config.databaseUrl });
+/* Supabase's Postgres (and most hosted Postgres) requires SSL, but
+   node-postgres doesn't turn it on just because the connection string
+   says sslmode=require - it needs the ssl option passed explicitly.
+   Supabase's cert chain isn't always in Node's default trust store,
+   so rejectUnauthorized: false is what Supabase's own docs recommend
+   here (the connection is still encrypted, just not chain-verified).
+   Local/plain "postgresql://...@localhost" dev DBs skip this. */
+const pool = new Pool({
+  connectionString: config.databaseUrl,
+  ssl: /supabase\.co|sslmode=require/i.test(config.databaseUrl)
+    ? { rejectUnauthorized: false }
+    : false
+});
 
 pool.on("error", function (err) {
   // Idle client errors shouldn't crash the whole process.

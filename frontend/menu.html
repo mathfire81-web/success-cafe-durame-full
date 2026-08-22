@@ -228,6 +228,7 @@
   </div>
 </footer>
 
+<script src="js/api-config.js"></script>
 <script src="js/main.js"></script>
 <script src="js/delivery-modal.js"></script>
 <script src="js/help-modal.js"></script>
@@ -537,9 +538,11 @@
         <textarea class="form-textarea" id="idea-message" name="message" placeholder="Tell us what's on your mind..." required></textarea>
       </div>
 
-      <button type="submit" class="btn btn-gold idea-form-submit">
+      <p class="idea-form-error" id="idea-form-error" role="alert" style="display:none; color:#c0392b; margin:0 0 12px;"></p>
+
+      <button type="submit" class="btn btn-gold idea-form-submit" id="idea-form-submit-btn">
         <svg class="icon" aria-hidden="true"><use href="#icon-idea"></use></svg>
-        Send Idea (ላክ)
+        <span class="idea-form-submit-label">Send Idea (ላክ)</span>
       </button>
     </form>
 

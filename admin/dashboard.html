@@ -38,6 +38,16 @@
         Orders
         <span class="sb-badge" id="badge-pending">0</span>
       </button>
+      <button type="button" class="sb-link" data-view="preorders">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 6l1.5 13a2 2 0 0 0 2 1.8h9a2 2 0 0 0 2-1.8L20 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="14" r="1.2" fill="currentColor"/><circle cx="15" cy="14" r="1.2" fill="currentColor"/></svg>
+        Pre-Orders
+        <span class="sb-badge" id="badge-preorder-pending">0</span>
+      </button>
+      <button type="button" class="sb-link" data-view="ideas">
+        <svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.45.9 1.15.9 1.9V16h5.4v-.3c0-.75.3-1.45.9-1.9A6 6 0 0 0 12 3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        Ideas
+        <span class="sb-badge" id="badge-ideas-total">0</span>
+      </button>
       <a class="sb-link" href="/menu.html" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5V4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
         Menu Page
@@ -237,6 +247,78 @@
       <div class="pagination-bar">
         <span id="pagination-summary"></span>
         <div class="pagination-controls" id="pagination-controls"></div>
+      </div>
+    </section>
+
+    <!-- ============ PRE-ORDERS VIEW ============ -->
+    <section class="dash-view" id="view-preorders" style="display:none;">
+
+      <div class="admin-tabs" id="preorder-status-tabs">
+        <button type="button" class="admin-tab is-active" data-pstatus="pending">Pending <span class="tab-count" id="pcount-pending"></span></button>
+        <button type="button" class="admin-tab" data-pstatus="confirmed">Confirmed <span class="tab-count" id="pcount-confirmed"></span></button>
+        <button type="button" class="admin-tab" data-pstatus="completed">Completed <span class="tab-count" id="pcount-completed"></span></button>
+        <button type="button" class="admin-tab" data-pstatus="cancelled">Cancelled <span class="tab-count" id="pcount-cancelled"></span></button>
+        <button type="button" class="admin-tab" data-pstatus="">All <span class="tab-count" id="pcount-all"></span></button>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-search">
+          <svg viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" id="preorders-search" placeholder="Search this page: code, name, phone...">
+        </div>
+        <button type="button" class="btn btn--primary" id="refresh-preorders-btn">Refresh</button>
+      </div>
+
+      <div class="orders-table-wrap">
+        <table class="orders-table" id="preorders-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Customer</th>
+              <th>Reservation</th>
+              <th>Guests</th>
+              <th>Items</th>
+              <th>Status</th>
+              <th>Placed</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="preorders-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="preorders-empty" style="display:none;">No reservations here yet.</div>
+      </div>
+
+      <div class="pagination-bar">
+        <span id="preorders-pagination-summary"></span>
+        <div class="pagination-controls" id="preorders-pagination-controls"></div>
+      </div>
+    </section>
+
+    <!-- ============ IDEAS VIEW ============ -->
+    <section class="dash-view" id="view-ideas" style="display:none;">
+
+      <div class="toolbar">
+        <div class="toolbar-search">
+          <svg viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" id="ideas-search" placeholder="Search this page: name, email, message...">
+        </div>
+        <select id="filter-idea-category" class="toolbar-select">
+          <option value="">All Categories</option>
+          <option value="menu">Menu</option>
+          <option value="delivery">Delivery</option>
+          <option value="website">Website</option>
+          <option value="service">Service</option>
+          <option value="other">Other</option>
+        </select>
+        <button type="button" class="btn btn--primary" id="refresh-ideas-btn">Refresh</button>
+      </div>
+
+      <div class="idea-grid" id="ideas-grid"></div>
+      <div class="empty-state" id="ideas-empty" style="display:none;">No ideas submitted yet.</div>
+
+      <div class="pagination-bar">
+        <span id="ideas-pagination-summary"></span>
+        <div class="pagination-controls" id="ideas-pagination-controls"></div>
       </div>
     </section>
   </div>

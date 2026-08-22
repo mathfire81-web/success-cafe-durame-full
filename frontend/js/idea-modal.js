@@ -2,8 +2,9 @@
   SHARE AN IDEA MODAL CONTROLLER
   The "Share an Idea" fab (and any ".js-idea-trigger") opens a floating
   panel with a short form: name, email, category, and a free-text idea.
-  Front-end only for now - on submit it just swaps to a thank-you state,
-  there's no backend wired up yet.
+  On submit this POSTs to /api/ideas (see js/api-config.js for
+  API_BASE_URL) - the same fetch pattern js/payment.js uses for orders -
+  and only shows the thank-you state once the server confirms it saved.
 */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -39,6 +40,10 @@ document.addEventListener("DOMContentLoaded", function () {
       form.style.display = "";
     }
     if (successPanel) successPanel.classList.remove("is-visible");
+    var errorEl = document.getElementById("idea-form-error");
+    if (errorEl) errorEl.style.display = "none";
+    var submitBtn = document.getElementById("idea-form-submit-btn");
+    if (submitBtn) submitBtn.disabled = false;
   }
 
   function openModal() {
@@ -75,8 +80,43 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  /* Front-end only for now: no backend to send this to yet, so submitting
-     just validates the fields and swaps in a thank-you confirmation. */
+  var submitBtn = document.getElementById("idea-form-submit-btn");
+  var submitLabel = submitBtn ? submitBtn.querySelector(".idea-form-submit-label") : null;
+  var errorEl = document.getElementById("idea-form-error");
+
+  function showIdeaError(message) {
+    if (!errorEl) return;
+    errorEl.textContent = message;
+    errorEl.style.display = "";
+  }
+
+  function clearIdeaError() {
+    if (!errorEl) return;
+    errorEl.style.display = "none";
+  }
+
+  function submitIdea() {
+    return fetch((window.API_BASE_URL || "") + "/api/ideas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: document.getElementById("idea-name").value.trim(),
+        email: document.getElementById("idea-email").value.trim(),
+        category: document.getElementById("idea-category").value,
+        message: document.getElementById("idea-message").value.trim()
+      })
+    }).then(function (res) {
+      return res.json().then(function (data) {
+        if (!res.ok) throw new Error(data.error || "Something went wrong sending your idea.");
+        return data;
+      });
+    });
+  }
+
+  /* Validates locally first (same as before), then sends the idea to
+     the server and only shows the thank-you state once it's actually
+     saved - so a submission never silently disappears on a bad
+     connection. */
   if (form) {
     form.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -84,8 +124,22 @@ document.addEventListener("DOMContentLoaded", function () {
         form.reportValidity();
         return;
       }
-      form.style.display = "none";
-      if (successPanel) successPanel.classList.add("is-visible");
+      clearIdeaError();
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitLabel) submitLabel.textContent = "Sending...";
+
+      submitIdea()
+        .then(function () {
+          form.style.display = "none";
+          if (successPanel) successPanel.classList.add("is-visible");
+        })
+        .catch(function (err) {
+          showIdeaError(err.message || "Something went wrong sending your idea. Please try again.");
+        })
+        .then(function () {
+          if (submitBtn) submitBtn.disabled = false;
+          if (submitLabel) submitLabel.textContent = "Send Idea (\u120b\u12ad)";
+        });
     });
   }
 

@@ -397,6 +397,41 @@ table.orders-table { width: 100%; border-collapse: collapse; font-size: 0.85rem;
 .status-verified { background: var(--status-blue-bg); color: var(--status-blue); }
 .status-rejected { background: var(--status-red-bg); color: var(--status-red); }
 .status-completed { background: var(--status-green-bg); color: var(--status-green); }
+.status-pending { background: var(--status-amber-bg); color: var(--status-amber); }
+.status-cancelled { background: var(--status-red-bg); color: var(--status-red); }
+
+/* ---- Ideas grid ---- */
+.idea-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.idea-card {
+  background: var(--dash-card);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.idea-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.idea-card-who { display: flex; flex-direction: column; gap: 2px; }
+.idea-card-name { font-weight: 700; color: var(--dash-text); font-size: 0.95rem; }
+.idea-card-email { font-size: 0.78rem; color: var(--dash-text-faint); }
+.idea-cat {
+  display: inline-flex; align-items: center; padding: 3px 10px;
+  border-radius: var(--radius-pill); font-size: 0.68rem; font-weight: 700;
+  text-transform: capitalize; white-space: nowrap;
+  background: var(--status-blue-bg); color: var(--status-blue);
+}
+.idea-cat.cat-menu { background: var(--status-amber-bg); color: var(--status-amber); }
+.idea-cat.cat-delivery { background: var(--status-teal-bg); color: var(--status-teal); }
+.idea-cat.cat-website { background: var(--status-blue-bg); color: var(--status-blue); }
+.idea-cat.cat-service { background: var(--status-green-bg); color: var(--status-green); }
+.idea-cat.cat-other { background: rgba(245,241,230,0.12); color: var(--dash-text-soft); }
+.idea-card-message { font-size: 0.86rem; color: var(--dash-text-soft); line-height: 1.5; margin: 0; white-space: pre-wrap; }
+.idea-card-date { font-size: 0.74rem; color: var(--dash-text-faint); margin-top: auto; padding-top: 6px; border-top: 1px solid var(--dash-border); }
 
 .empty-state { padding: 48px 24px; text-align: center; color: var(--dash-text-faint); }
 
