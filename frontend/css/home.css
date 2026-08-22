@@ -568,7 +568,7 @@
 
 @media (max-width: 640px) {
   .hero { min-height: 100svh; }
-  .hero-content { padding: 130px 0 60px; }
+  .hero-content { padding: 95px 0 100px; }
   .hero-strip { gap: 16px 24px; }
   .about-section { padding: 60px 0 64px; }
   .about-media-tag { max-width: none; }
