@@ -507,3 +507,60 @@ body.delivery-modal-open { overflow: hidden; }
   .delivery-modal-head h2 { font-size: 1.3rem; }
   .delivery-modal-foot { flex-direction: column; }
 }
+
+/* ---- "Are you sure?" guard shown only when food has been picked and the
+   person tries to close the panel without checking out (see
+   js/delivery-modal.js). Sits on top of the delivery modal itself. ---- */
+.dm-close-confirm {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(11, 42, 31, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.dm-close-confirm.is-open {
+  display: flex;
+  animation: dm-fade-in 0.18s ease;
+}
+
+.dm-close-confirm-box {
+  width: 100%;
+  max-width: 380px;
+  background: var(--cream);
+  border-radius: var(--radius-md);
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5);
+  padding: 26px 24px;
+  text-align: center;
+  animation: hm-pop-in 0.2s cubic-bezier(.2, .8, .3, 1.1);
+}
+
+.dm-close-confirm-text {
+  margin: 0 0 20px;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.dm-close-confirm-text .label-am {
+  display: inline-block;
+  font-family: var(--font-amharic);
+  color: var(--ink-soft);
+}
+
+.dm-close-confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+.dm-close-confirm-actions .btn {
+  flex: 1;
+  padding: 12px 14px;
+  font-size: 0.88rem;
+}
+
+@media (max-width: 400px) {
+  .dm-close-confirm-actions { flex-direction: column; }
+}

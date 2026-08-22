@@ -50,6 +50,11 @@ var SuccessCafeCart = (function () {
     return cart;
   }
 
+  function clearCart() {
+    saveCart([]);
+    return [];
+  }
+
   function setQty(id, qty) {
     var cart = getCart();
     for (var i = 0; i < cart.length; i++) {
@@ -228,6 +233,7 @@ var SuccessCafeCart = (function () {
     saveCart: saveCart,
     addItem: addItem,
     removeItem: removeItem,
+    clearCart: clearCart,
     setQty: setQty,
     getCount: getCount,
     getTotal: getTotal,

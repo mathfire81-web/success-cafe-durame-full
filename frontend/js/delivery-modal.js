@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if (!overlay) return;
 
   var closeBtn = document.getElementById("delivery-modal-close");
+  var confirmBox = document.getElementById("dm-close-confirm");
+  var confirmBack = document.getElementById("dm-close-confirm-back");
+  var confirmLeave = document.getElementById("dm-close-confirm-leave");
 
   function openModal() {
     var cartOverlay = document.getElementById("cart-drawer-overlay");
@@ -26,7 +29,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (closeBtn) closeBtn.focus();
   }
 
+  /* Actually closes the panel (bypasses the "are you sure?" guard). */
   function closeModal() {
+    hideCloseConfirm();
     overlay.classList.remove("is-open");
     document.body.classList.remove("delivery-modal-open");
     if (window.location.hash === "#delivery") {
@@ -34,14 +39,66 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  if (closeBtn) closeBtn.addEventListener("click", closeModal);
+  /* "I'm sure" - the person confirmed they want to abandon the food they
+     picked, so clear it from the cart along with the panel. */
+  function closeModalAndClearCart() {
+    if (typeof SuccessCafeCart !== "undefined") {
+      try { SuccessCafeCart.clearCart(); } catch (e) { /* ignore */ }
+    }
+    closeModal();
+  }
+
+  /* Whether the person has picked any food yet - if so, closing the panel
+     is very likely accidental, since delivery can only be ordered from
+     here. */
+  function hasChosenFood() {
+    if (typeof SuccessCafeCart === "undefined") return false;
+    try {
+      var cart = SuccessCafeCart.getCart();
+      return !!cart && cart.length > 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function showCloseConfirm() {
+    if (!confirmBox) { closeModal(); return; }
+    confirmBox.classList.add("is-open");
+    if (confirmLeave) confirmLeave.focus();
+  }
+
+  function hideCloseConfirm() {
+    if (confirmBox) confirmBox.classList.remove("is-open");
+  }
+
+  /* Entry point for every "close" trigger (✕ button, backdrop click,
+     Escape). Only interrupts with the confirmation if food has actually
+     been chosen - otherwise it closes right away. */
+  function requestClose() {
+    if (confirmBox && confirmBox.classList.contains("is-open")) return;
+    if (hasChosenFood()) {
+      showCloseConfirm();
+    } else {
+      closeModal();
+    }
+  }
+
+  if (closeBtn) closeBtn.addEventListener("click", requestClose);
 
   overlay.addEventListener("click", function (event) {
-    if (event.target === overlay) closeModal();
+    if (event.target === overlay) requestClose();
   });
 
+  if (confirmBack) confirmBack.addEventListener("click", hideCloseConfirm);
+  if (confirmLeave) confirmLeave.addEventListener("click", closeModalAndClearCart);
+
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && overlay.classList.contains("is-open")) closeModal();
+    if (event.key !== "Escape") return;
+    if (confirmBox && confirmBox.classList.contains("is-open")) {
+      hideCloseConfirm();
+    } else if (overlay.classList.contains("is-open")) {
+      requestClose();
+    }
   });
 
   /* Every link/tab site-wide that points at "Delivery" opens the

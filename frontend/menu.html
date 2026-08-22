@@ -304,6 +304,26 @@
         Checkout
       </a>
     </div>
+
+    <!-- Shown only if the person picked food, then tries to close the panel
+         without checking out. See js/delivery-modal.js. -->
+    <div class="dm-close-confirm" id="dm-close-confirm">
+      <div class="dm-close-confirm-box">
+        <p class="dm-close-confirm-text">
+          Are you sure? <span class="label-am">(እርግጠኛ ኖት ዴሊቨሪ አይፈልጉም?)</span><br>
+          You can't order us delivery unless through this page!
+          <span class="label-am">(ከዝህ ገጽ ዉጪ ዴሊቨሪ ማዘዝ አይችሉም!)</span>
+        </p>
+        <div class="dm-close-confirm-actions">
+          <button type="button" class="btn btn-outline-dark dm-close-confirm-back" id="dm-close-confirm-back">
+            Go back <span class="label-am">(ተመለስ)</span>
+          </button>
+          <button type="button" class="btn btn-gold dm-close-confirm-leave" id="dm-close-confirm-leave">
+            I'm sure <span class="label-am">(እርግጠኛ ነኝ)</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
