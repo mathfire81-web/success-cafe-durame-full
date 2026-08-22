@@ -816,20 +816,24 @@ p { margin: 0 0 1em; color: var(--ink-soft); }
   .mobile-tabbar { display: flex; }
   body { padding-bottom: 82px; }
 
-   .hero-ctas, .cta-band-actions, .checker-form-row, .tracking-form-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .cta-band-actions .btn { width: 100%; }
-
-  /* Hero CTAs (View Our Menu / Take Away Delivery / Pre Order Food):
-     centered at their natural width instead of stretching edge to edge. */
-  .hero-ctas {
+     .hero-ctas {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
+    gap: 10px;
   }
   .hero-ctas .btn {
     width: auto;
-    max-width: 88%;
+  }
+  .hero-ctas .btn:nth-child(1),
+  .hero-ctas .btn:nth-child(2) {
+    flex: 1 1 auto;
+    max-width: 47%;
+  }
+  .hero-ctas .btn:nth-child(3) {
+    flex-basis: 100%;
+    max-width: 90%;
   }
 
   .cta-band-row, .delivery-banner-row {
