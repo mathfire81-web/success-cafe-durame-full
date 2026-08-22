@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payment Verification | Success Cafe</title>
+<title>Payment Verification | Success Cafe (ክፍያ ያረጋግጡ)</title>
 <meta name="description" content="Success Cafe in Durame town - confirm your details and verify payment to complete your order.">
 <link rel="stylesheet" href="css/variables.css">
 <link rel="stylesheet" href="css/style.css">
@@ -175,9 +175,9 @@
     <!-- Empty cart guard (shown if someone lands here with nothing in cart) -->
     <div class="checkout-panel cart-empty" id="payment-empty">
       <div class="cart-empty-icon">🛒</div>
-      <h2>Your cart is empty</h2>
+      <h2>Your cart is empty (ምንም ምግብ ኣልመረጡም)</h2>
       <p>There's nothing to check out yet. Head back to the menu and add a few favorites first.</p>
-      <a href="menu.html" class="btn btn-gold">Browse the Menu</a>
+      <a href="menu.html" class="btn btn-gold">Browse the Menu (ሜኑ ይቃኙ)</a>
     </div>
 
     <!-- Checkout form -->
@@ -190,22 +190,22 @@
         <div class="form-section">
           <div class="form-grid">
             <div class="form-field">
-              <label for="field-name">Full Name</label>
+              <label for="field-name">Full Name (ሙሉ ስም)</label>
               <input type="text" id="field-name" name="name" class="form-input" placeholder="e.g. Sara Getachew" autocomplete="name">
             </div>
             <div class="form-field">
-              <label for="field-phone">Phone Number</label>
+              <label for="field-phone">Phone Number (ስልክ ቁጥር)</label>
               <input type="tel" id="field-phone" name="phone" class="form-input" placeholder="09XX XXX XXX" autocomplete="tel">
             </div>
             <div class="form-field is-full" id="address-field" style="display:none;">
-              <label>Delivery Address</label>
+              <label>Delivery Address (አድራሻ)</label>
 
               <!-- Confirmed automatically from the landmark picked in the
                    delivery panel's map - nothing to type. -->
               <div class="delivery-confirm-card" id="delivery-confirm-card">
                 <div class="dcc-icon" aria-hidden="true">📍</div>
                 <div class="dcc-body">
-                  <p class="dcc-eyebrow">Confirmed from your delivery selection</p>
+                  <p class="dcc-eyebrow">Confirmed from your delivery selection(የእርሶ አድራሻ)</p>
                   <p class="dcc-landmark" id="dcc-landmark">—</p>
                   <div class="dcc-meta">
                     <span id="dcc-distance">— km</span>
@@ -215,7 +215,7 @@
                     <span id="dcc-fee">— Br delivery</span>
                   </div>
                 </div>
-                <a href="delivery.html#delivery" class="dcc-change">Change</a>
+                <a href="delivery.html#delivery" class="dcc-change">Change (ይቀይሩ)</a>
               </div>
 
               <!-- Fallback: shown only if someone reaches checkout as a
@@ -228,34 +228,34 @@
               <input type="hidden" id="field-address" name="address">
             </div>
             <div class="form-field is-full" id="pickup-note">
-              <p class="form-hint">You're ordering in-cafe - your order will be ready at our Durame town counter in about 20 minutes.</p>
+              <p class="form-hint">You're ordering in-cafe - your order will be ready at our Durame town counter in about 20 minutes. (ሳይቦዝኑ የጠብቁን ምግቦት በ20 ደቂቃ ዉሰጥ ይደርሳል)</p>
             </div>
           </div>
         </div>
 
         <div class="form-section">
-          <h2 style="font-size:1.05rem; margin-bottom:6px;">Payment Method</h2>
-          <p class="section-lede" style="margin-bottom:16px;">Choose how you'd like to pay for this order.</p>
+          <h2 style="font-size:1.05rem; margin-bottom:6px;">Payment Method (የክፍያ አይነት)</h2>
+          <p class="section-lede" style="margin-bottom:16px;">Choose how you'd like to pay for this order. (የምፈልጉትን የመክፈያ መንገድ ይምረጡ)</p>
 
           <div class="payment-methods fulfillment-options" id="payment-methods">
             <label class="fulfillment-option">
               <input type="radio" name="payment-method" value="telebirr" checked>
-              <strong>Telebirr</strong>
+              <strong>Telebirr (ቴሌ ብር)</strong>
               <span>Mobile money</span>
             </label>
             <label class="fulfillment-option">
               <input type="radio" name="payment-method" value="cbebirr">
-              <strong>CBE Birr</strong>
+              <strong>CBE Birr (ሞባይል ባንክንግ)</strong>
               <span>Mobile banking</span>
             </label>
             <label class="fulfillment-option">
               <input type="radio" name="payment-method" value="bank">
-              <strong>Bank Transfer</strong>
+              <strong>Bank Transfer (በባንክ)</strong>
               <span>Commercial Bank of Ethiopia</span>
             </label>
             <label class="fulfillment-option">
               <input type="radio" name="payment-method" value="cash">
-              <strong>Cash</strong>
+              <strong>Cash (በካሽ)</strong>
               <span>Pay on pickup / delivery</span>
             </label>
           </div>
@@ -263,24 +263,24 @@
           <div class="payment-note" id="payment-note"></div>
 
           <div class="form-field txn-reference-field" id="txn-reference-field">
-            <label for="field-txn">Transaction Reference</label>
+            <label for="field-txn">Transaction Reference (የተከፈለበት ማረጋገጫ ኮድ)</label>
             <input type="text" id="field-txn" name="txn" class="form-input" placeholder="e.g. TB25A1B2C3">
             <p class="form-hint">Found in your payment confirmation SMS or receipt.</p>
           </div>
 
           <div class="upload-field" id="upload-field">
-            <label for="field-proof">Payment Screenshot</label>
+            <label for="field-proof">Payment Screenshot (የከፈሉበት ደረሰኝ ፎቶ)</label>
             <div class="upload-dropzone" id="upload-dropzone">
               <input type="file" id="field-proof" name="proof" accept="image/*" aria-describedby="upload-hint">
               <div class="upload-dropzone-icon"><svg class="icon" aria-hidden="true"><use href="#icon-upload"></use></svg></div>
-              <p class="upload-dropzone-title">Upload a photo to verify payment</p>
+              <p class="upload-dropzone-title">Upload a photo to verify payment (የከፈሉበት ደረሰኝ ፎቶ ያስገቡ)</p>
               <p class="upload-dropzone-sub" id="upload-hint">Screenshot or photo of your receipt &middot; JPG or PNG, up to 8MB</p>
             </div>
             <div class="upload-preview" id="upload-preview">
               <img id="upload-preview-img" src="" alt="Payment screenshot preview">
               <div class="upload-preview-info">
                 <div class="file-name" id="upload-file-name"></div>
-                <div class="file-status"><svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>Ready to verify</div>
+                <div class="file-status"><svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>Ready to verify (ዝግጁ)</div>
               </div>
               <button type="button" class="upload-preview-remove" id="upload-remove" aria-label="Remove uploaded photo">
                 <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
@@ -293,7 +293,7 @@
 
         <button type="submit" class="btn btn-gold btn-verify" id="verify-btn">
           <span class="spinner"></span>
-          <span class="label-default">Verify &amp; Place Order</span>
+          <span class="label-default">Verify &amp; Place Order (ያረጋግጡ)</span>
           <span class="label-loading">Verifying&hellip;</span>
         </button>
       </form>
@@ -302,28 +302,28 @@
     <!-- Confirmation state (hidden until payment is verified) -->
     <div class="checkout-panel confirmation-panel" id="confirmation-panel">
       <div class="confirmation-badge">&#10003;</div>
-      <h2>Order Confirmed!</h2>
-      <p>Thank you - your payment has been verified and your order is on its way to our kitchen. We'll have it ready fresh, just for you.</p>
-      <p class="confirmation-proof" id="confirmation-proof" style="display:none;"><svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>Payment screenshot received</p>
+      <h2>Order Confirmed!(ትዕዛዞ ደርሶናል!)</h2>
+      <p>Thank you - your payment has been verified and your order is on its way to our kitchen. We'll have it ready fresh, just for you.(ደረሰኞን እነዳረጋገጥን ምግቦት ይዘጋጃል )</p>
+      <p class="confirmation-proof" id="confirmation-proof" style="display:none;"><svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>Payment screenshot received (ደረሰኙ ደርሶናል)</p>
       <div class="order-code">Order <span id="order-code-value">SC-000000</span></div>
       <div class="confirmation-actions">
-        <a href="index.html" class="btn btn-outline-dark">Back to Home</a>
-        <a href="menu.html" class="btn btn-gold">Order Something Else</a>
+        <a href="index.html" class="btn btn-outline-dark">Back to Home (ወደ ዋና ገጽ)</a>
+        <a href="menu.html" class="btn btn-gold">Order Something Else(ተጨማሪ ይዘዙ)</a>
       </div>
     </div>
 
     <!-- Order summary -->
     <div class="cart-side" id="payment-summary-side">
       <div class="summary-panel">
-        <h2>Order Summary</h2>
+        <h2>Order Summary (የትዕዛዞ ክለሳ)</h2>
 
         <ul class="summary-items-list" id="summary-items-list"></ul>
 
-        <div class="summary-row"><span>Fulfillment</span><span id="summary-fulfillment">In Cafe</span></div>
-        <div class="summary-row"><span>Subtotal</span><span id="summary-subtotal">0 Br</span></div>
-        <div class="summary-row"><span>Delivery Fee</span><span id="summary-delivery">&mdash;</span></div>
+        <div class="summary-row"><span>Fulfillment(አገልግሎቱ)</span><span id="summary-fulfillment">In Cafe (ካፌ ዉስጥ)</span></div>
+        <div class="summary-row"><span>Subtotal (የምግቦ ጠቅላላ  ዋጋ)</span><span id="summary-subtotal">0 Br</span></div>
+        <div class="summary-row"><span>Delivery Fee (የዴሊቨሪ ዋጋ)</span><span id="summary-delivery">&mdash;</span></div>
         <div class="summary-divider"></div>
-        <div class="summary-total-row"><span>Total</span><span id="summary-total">0 Br</span></div>
+        <div class="summary-total-row"><span>Total (ድምር ዋጋ)</span><span id="summary-total">0 Br</span></div>
 
         <a href="#cart" class="summary-continue js-cart-trigger">Edit cart or fulfillment</a>
       </div>
@@ -638,7 +638,7 @@
           <option value="website">Website / App</option>
           <option value="service">In-Cafe Service</option>
           <option value="other">Something Else</option>
-        </select>
+        </select> 
       </div>
 
       <div class="form-field">
