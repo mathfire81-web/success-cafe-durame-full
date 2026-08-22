@@ -194,19 +194,15 @@ document.addEventListener("DOMContentLoaded", function () {
         event.preventDefault();
         return;
       }
-      /* The cart drawer is shared by both flows - items picked
-         straight off a menu grid, and items picked through the
-         delivery panel's food picker. Each add already tags the cart
-         as "in-cafe" or "delivery" as it happens (see menu.js/home.js
-         and js/food-picker.js), so checkout from here just needs to
-         respect whatever that tag currently is instead of always
-         forcing "in-cafe" - otherwise a delivery order built from the
-         delivery panel would silently lose its fee the moment someone
-         checks out from the cart instead of the panel's own button. */
-      var current = SuccessCafeCart.getFulfillment();
-      if (current.method !== "delivery") {
-        SuccessCafeCart.setFulfillment("in-cafe", 0);
-      }
+      /* This is the plain "Checkout" button (menu/cart drawer), so this
+         is always an in-cafe order - always tag it as such. Genuine
+         delivery orders are tagged separately, right before navigating,
+         by the delivery panel's own Checkout button (dm-checkout-btn,
+         see js/delivery-map.js). Without this unconditional reset, a
+         stale "delivery" tag left over from merely browsing the
+         delivery panel's quantity steppers would stick around and
+         mislabel every later in-cafe order too. */
+      SuccessCafeCart.setFulfillment("in-cafe", 0);
     });
   }
 

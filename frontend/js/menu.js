@@ -124,15 +124,13 @@ function wireAddToCart() {
 
     SuccessCafeCart.addItem(item);
     /* Added straight from the menu grid (not the delivery panel's food
-       picker). Only default this to "in-cafe" if the cart wasn't
-       already a delivery order - otherwise adding one more item from
-       the regular menu grid (e.g. via the cart drawer's "Browse the
-       Menu" link while mid-checkout) would silently wipe out the
-       delivery fee AND the confirmed landmark/address details already
-       picked on the delivery map. */
-    if (SuccessCafeCart.getFulfillment().method !== "delivery") {
-      SuccessCafeCart.setFulfillment("in-cafe", 0);
-    }
+       picker) - always an in-cafe item. The delivery panel's own
+       Checkout button re-tags the order "delivery" right before it
+       navigates to checkout, so it's still safe to add more items from
+       here in between without losing that - but adding from here should
+       never itself leave a stale "delivery" tag in place for the next,
+       unrelated in-cafe order. */
+    SuccessCafeCart.setFulfillment("in-cafe", 0);
 
     var card = btn.closest(".item-card");
     var thumb = card ? card.querySelector(".item-card-media img") : null;

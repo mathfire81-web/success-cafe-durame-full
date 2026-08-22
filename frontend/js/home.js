@@ -22,15 +22,12 @@ function wireHomeMenuAddToCart() {
     if (!item.id) return;
 
     SuccessCafeCart.addItem(item);
-    /* Added straight from the home page grid (not the delivery panel's
-       food picker). Same reasoning as menu.js's wireAddToCart: don't
-       clobber an in-progress delivery order (fee + confirmed landmark
-       details) just because one more item was added from a plain
-       menu grid - only default to "in-cafe" when it wasn't already
-       "delivery". */
-    if (SuccessCafeCart.getFulfillment().method !== "delivery") {
-      SuccessCafeCart.setFulfillment("in-cafe", 0);
-    }
+    /* Added straight from the home page grid - always an in-cafe item.
+       See the matching fix in js/menu.js and js/cart-drawer.js: genuine
+       delivery orders are tagged by the delivery panel's own Checkout
+       button right before it navigates, so this no longer needs to (and
+       shouldn't) preserve a stale "delivery" tag from earlier browsing. */
+    SuccessCafeCart.setFulfillment("in-cafe", 0);
 
     var card = btn.closest(".menu-card");
     var thumb = card ? card.querySelector(".menu-card-media img") : null;
