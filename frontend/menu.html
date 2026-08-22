@@ -309,17 +309,34 @@
          without checking out. See js/delivery-modal.js. -->
     <div class="dm-close-confirm" id="dm-close-confirm">
       <div class="dm-close-confirm-box">
+        <div class="dm-close-confirm-badge">
+          <span class="dm-close-confirm-badge-ring"></span>
+          <span class="dm-close-confirm-badge-ring dm-close-confirm-badge-ring-2"></span>
+          <svg class="icon" aria-hidden="true"><use href="#icon-delivery"></use></svg>
+        </div>
+
+        <h3 class="dm-close-confirm-heading">
+          Are you sure?
+          <span class="label-am">(እርግጠኛ ኖት ዴሊቨሪ አይፈልጉም?)</span>
+        </h3>
         <p class="dm-close-confirm-text">
-          Are you sure? <span class="label-am">(እርግጠኛ ኖት ዴሊቨሪ አይፈልጉም?)</span><br>
           You can't order us delivery unless through this page!
           <span class="label-am">(ከዝህ ገጽ ዉጪ ዴሊቨሪ ማዘዝ አይችሉም!)</span>
         </p>
+
+        <div class="dm-close-confirm-chip" id="dm-close-confirm-chip">
+          <svg class="icon" aria-hidden="true"><use href="#icon-bag"></use></svg>
+          <span id="dm-close-confirm-count">Your picks</span> will be cleared
+        </div>
+
         <div class="dm-close-confirm-actions">
-          <button type="button" class="btn btn-outline-dark dm-close-confirm-back" id="dm-close-confirm-back">
-            Go back <span class="label-am">(ተመለስ)</span>
-          </button>
-          <button type="button" class="btn btn-gold dm-close-confirm-leave" id="dm-close-confirm-leave">
+          <button type="button" class="dm-close-confirm-primary" id="dm-close-confirm-leave">
+            <svg class="icon" aria-hidden="true"><use href="#icon-trash"></use></svg>
             I'm sure <span class="label-am">(እርግጠኛ ነኝ)</span>
+          </button>
+          <button type="button" class="dm-close-confirm-secondary" id="dm-close-confirm-back">
+            <svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>
+            Go back <span class="label-am">(ተመለስ)</span>
           </button>
         </div>
       </div>
