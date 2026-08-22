@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var confirmBox = document.getElementById("dm-close-confirm");
   var confirmBack = document.getElementById("dm-close-confirm-back");
   var confirmLeave = document.getElementById("dm-close-confirm-leave");
+  var confirmCount = document.getElementById("dm-close-confirm-count");
 
   function openModal() {
     var cartOverlay = document.getElementById("cart-drawer-overlay");
@@ -63,6 +64,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function showCloseConfirm() {
     if (!confirmBox) { closeModal(); return; }
+    if (confirmCount && typeof SuccessCafeCart !== "undefined") {
+      try {
+        var count = SuccessCafeCart.getCount();
+        confirmCount.textContent = count + (count === 1 ? " item" : " items");
+      } catch (e) { /* leave default label */ }
+    }
     confirmBox.classList.add("is-open");
     if (confirmLeave) confirmLeave.focus();
   }
