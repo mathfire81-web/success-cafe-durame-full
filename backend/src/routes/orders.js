@@ -1,8 +1,9 @@
 const express = require("express");
+const path = require("path");
+const fs = require("fs");
 const db = require("../db");
 const { withTransaction } = require("../db");
-const { uploadProof } = require("../middleware/uploadProof");
-const { uploadPaymentProof } = require("../lib/supabaseStorage");
+const { upload, UPLOAD_DIR } = require("../middleware/upload");
 const { generateUniqueOrderCode } = require("../lib/orderCode");
 const { getLandmarkById } = require("../lib/delivery");
 const { PAYMENT_METHODS } = require("../lib/paymentMethods");
@@ -13,16 +14,15 @@ function badRequest(res, message) {
   return res.status(400).json({ error: message });
 }
 
-/* req.file now lives in memory (see middleware/uploadProof.js), so
-   there's nothing on disk to clean up on a validation failure -
-   invalid requests just let the buffer get garbage collected. Kept as
-   a no-op function so every existing cleanupUpload(req.file) call
-   below doesn't need to change. */
+/* Deletes an uploaded file if the request turns out to be invalid
+   after all - multer already wrote it to disk by the time our own
+   validation runs. */
 function cleanupUpload(file) {
-  // no-op: memory storage, nothing to delete
+  if (!file) return;
+  fs.unlink(file.path, function () { /* best-effort */ });
 }
 
-router.post("/", uploadProof.single("proof"), async function (req, res, next) {
+router.post("/", upload.single("proof"), async function (req, res, next) {
   try {
     const body = req.body || {};
     const name = (body.name || "").trim();
@@ -112,20 +112,7 @@ router.post("/", uploadProof.single("proof"), async function (req, res, next) {
     const deliveryFee = deliveryLandmark ? deliveryLandmark.fee : 0;
     const total = subtotal + deliveryFee;
     const initialStatus = methodConfig.requiresRef ? "pending_verification" : "confirmed";
-
-    // Uploaded to Supabase Storage (private bucket) here, before the
-    // order row is written, so payment_proof_path always points at
-    // something that will actually still exist later - see
-    // lib/supabaseStorage.js for why this can't just go to local disk.
-    let proofStoragePath = null;
-    if (req.file) {
-      try {
-        proofStoragePath = await uploadPaymentProof(req.file.buffer, req.file.mimetype, req.file.originalname);
-      } catch (uploadErr) {
-        return next(uploadErr);
-      }
-    }
-
+    const proofRelativePath = req.file ? path.basename(req.file.path) : null;
     const deliveryAddressText = deliveryLandmark
       ? "Near " + deliveryLandmark.name + (deliveryLandmark.approx ? " (approx.)" : "") + ", Durame town"
       : null;
@@ -153,7 +140,7 @@ router.post("/", uploadProof.single("proof"), async function (req, res, next) {
           total,
           paymentMethod,
           methodConfig.requiresRef ? txnReference : null,
-          proofStoragePath,
+          proofRelativePath,
           initialStatus
         ]
       );

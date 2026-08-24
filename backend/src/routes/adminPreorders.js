@@ -1,6 +1,9 @@
 const express = require("express");
+const path = require("path");
+const fs = require("fs");
 const db = require("../db");
 const requireAdmin = require("../middleware/requireAdmin");
+const { UPLOAD_DIR } = require("../middleware/upload");
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -25,7 +28,7 @@ router.get("/", async function (req, res, next) {
     params.push(pageSize, offset);
     const listResult = await db.query(
       `SELECT id, preorder_code, customer_name, customer_phone, reservation_date, reservation_time,
-              guests, item_count, subtotal, status, created_at
+              guests, item_count, subtotal, status, created_at, payment_proof_path
        FROM preorders ${whereClause}
        ORDER BY created_at DESC
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
@@ -67,6 +70,7 @@ router.get("/:id", async function (req, res, next) {
       notes: preorder.notes,
       status: preorder.status,
       adminNote: preorder.admin_note,
+      hasProof: !!preorder.payment_proof_path,
       createdAt: preorder.created_at,
       items: itemsResult.rows.map(function (row) {
         return {
@@ -78,6 +82,25 @@ router.get("/:id", async function (req, res, next) {
         };
       })
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/admin/preorders/:id/proof - streams the customer's optional
+// deposit screenshot from local disk, same as
+// GET /api/admin/orders/:id/proof.
+router.get("/:id/proof", async function (req, res, next) {
+  try {
+    const result = await db.query("SELECT payment_proof_path FROM preorders WHERE id = $1", [req.params.id]);
+    const relativePath = result.rows[0] && result.rows[0].payment_proof_path;
+    if (!relativePath) return res.status(404).json({ error: "No payment proof on this preorder." });
+
+    const absolutePath = path.join(UPLOAD_DIR, relativePath);
+    if (!absolutePath.startsWith(UPLOAD_DIR) || !fs.existsSync(absolutePath)) {
+      return res.status(404).json({ error: "Proof file not found." });
+    }
+    res.sendFile(absolutePath);
   } catch (err) {
     next(err);
   }
@@ -111,6 +134,7 @@ function formatPreorderSummary(row) {
     itemCount: row.item_count,
     subtotal: Number(row.subtotal),
     status: row.status,
+    hasProof: !!row.payment_proof_path,
     createdAt: row.created_at
   };
 }
