@@ -14,20 +14,38 @@
   selected, so the route line only costs load time when it's wanted.
 */
 
-/* Success Cafe, Durame town. */
+/* Success Cafe, Durame town. Fixed - there's no admin control for
+   this (it's the one physical constant, not a manageable zone), so
+   it stays a hardcoded literal, same as before. */
 var CAFE_LOCATION = { lat: 7.2449066412107825, lng: 37.90079484003493 };
 
-/* Real delivery landmarks around Durame town. */
-var LANDMARKS = [
-  { id: "hambo-church",      name: "Durame Hambo Kalehiwet Church",              lat: 7.251010349648522,  lng: 37.90914868801586 },
-  { id: "higa-school",       name: "Higa Model Boarding School",                 lat: 7.243944488958062,  lng: 37.90719042968092 },
-  { id: "aberash-hotel",     name: "Aberash Hotel",                              lat: 7.240810360482482,  lng: 37.895540383624805 },
-  { id: "kale-heiwot-1",     name: "Durame Kale Heiwot Church #1",               lat: 7.239226316411734,  lng: 37.89376905914108 },
-  { id: "bilal-mosque",      name: "Durame Bilal Mosque (ዱራሜ ቢላል መስጂድ)",        lat: 7.239725306030645,  lng: 37.90417962663293 },
-  { id: "apostolic-church",  name: "Durame Apostolic Church",                    lat: 7.245000153241193,  lng: 37.90492856893984 },
-  { id: "stadium",           name: "Durame Stadium",                             lat: 7.247135928043366,  lng: 37.90472224272433 },
-  { id: "utubo-adebabay",    name: "Durame Utubo Adebabay",                      lat: 7.245400,           lng: 37.902100, approx: true }
-];
+/* LANDMARKS used to be a hardcoded array here. It's now loaded live
+   from GET /api/delivery-landmarks, which reads the admin-managed
+   delivery_landmarks table (see admin dashboard's "Delivery Zones"
+   panel / backend/src/routes/adminDeliveryZones.js) - so adding,
+   editing, or removing a zone in the dashboard now actually shows up
+   on the site instead of requiring a code change + redeploy.
+
+   The API already returns km/fee/timeLabel precomputed per landmark
+   (backend/src/lib/delivery.js, using the exact same formula as
+   dmHaversineKm/dmEstimateForDistance below - kept here for parity/
+   reference, not because this file still calls them), so nothing
+   downstream needs to change how it reads a landmark object. */
+var LANDMARKS = [];
+
+var LANDMARKS_READY = fetch((window.API_BASE_URL || "") + "/api/delivery-landmarks")
+  .then(function (res) {
+    if (!res.ok) throw new Error("Failed to load delivery landmarks (" + res.status + ")");
+    return res.json();
+  })
+  .then(function (data) {
+    LANDMARKS = data.landmarks || [];
+    return LANDMARKS;
+  })
+  .catch(function (err) {
+    console.error("Could not load delivery landmarks:", err);
+    return LANDMARKS;
+  });
 
 function dmFormatFee(value) {
   return value.toFixed(0) + " Br";
@@ -54,14 +72,6 @@ function dmEstimateForDistance(km) {
   var highMin = lowMin + 10;
   return { fee: fee, timeLabel: lowMin + "-" + highMin + " min", km: km };
 }
-
-/* Precompute each landmark's distance from the cafe once. */
-LANDMARKS.forEach(function (spot) {
-  spot.km = dmHaversineKm(CAFE_LOCATION.lat, CAFE_LOCATION.lng, spot.lat, spot.lng);
-  var est = dmEstimateForDistance(spot.km);
-  spot.fee = est.fee;
-  spot.timeLabel = est.timeLabel;
-});
 
 /* ---- Google Maps embed URLs (key-less) ----
    Default cafe view: plain "q=" marker, satellite basemap (t=k) - fast
@@ -225,7 +235,9 @@ document.addEventListener("DOMContentLoaded", function () {
   var overlay = document.getElementById("delivery-modal-overlay");
   if (!overlay) return;
 
-  dmRenderLandmarkChips();
+  /* LANDMARKS now comes from a fetch, so wait for it before building
+     the chip row - see the LANDMARKS_READY comment near the top. */
+  LANDMARKS_READY.then(dmRenderLandmarkChips);
 
   /* Lazily load the map iframe the first time the panel opens, so the
      page doesn't spend a request on an embed nobody may ever see. */
