@@ -7,7 +7,7 @@ const { upload, UPLOAD_DIR } = require("../middleware/upload");
 const { generateUniqueOrderCode } = require("../lib/orderCode");
 const { getLandmarkById } = require("../lib/delivery");
 const { PAYMENT_METHODS } = require("../lib/paymentMethods");
-const { sendTelegramMessage } = require("../lib/telegram");
+const { sendTelegramMessage, sendTelegramPhoto, escapeHtml, formatItemsTable } = require("../lib/telegram");
 
 const router = express.Router();
 
@@ -21,6 +21,15 @@ function badRequest(res, message) {
 function cleanupUpload(file) {
   if (!file) return;
   fs.unlink(file.path, function () { /* best-effort */ });
+}
+
+/* Formats one "Label   value" row for the <pre> block in the
+   Telegram notification below - a fixed-width label column so
+   everything lines up like a little table. Escapes the value since
+   it may contain customer-entered text. */
+function pad2(label, value) {
+  const labelCol = (label + " ".repeat(10)).slice(0, 10);
+  return labelCol + escapeHtml(value) + "\n";
 }
 
 router.post("/", upload.single("proof"), async function (req, res, next) {
@@ -161,20 +170,29 @@ router.post("/", upload.single("proof"), async function (req, res, next) {
 
     // Fire-and-forget - never let a Telegram hiccup delay or fail the
     // customer's order response.
-    const itemsList = orderItems
-      .map(function (i) { return i.qty + "x " + i.name; })
-      .join("\n");
-    sendTelegramMessage(
-      "🛎️ <b>New order " + order.order_code + "</b>\n" +
-      "👤 " + name + " (" + phone + ")\n" +
-      (fulfillmentMethod === "delivery"
-        ? "🚗 Delivery: " + deliveryAddressText + "\n"
-        : "🏬 In-cafe\n") +
-      "💳 " + paymentMethod + (txnReference ? " (" + txnReference + ")" : "") + "\n\n" +
-      itemsList + "\n\n" +
-      "Total: " + total + " ETB\n" +
-      "Status: " + order.status
+    const itemsTable = formatItemsTable(
+      orderItems.map(function (i) { return { qty: i.qty, name: i.name, total: i.lineTotal }; })
     );
+    sendTelegramMessage(
+      "🛎️ <b>New order " + escapeHtml(order.order_code) + "</b>\n\n" +
+      "<pre>" +
+      pad2("Customer", name) +
+      pad2("Phone", phone) +
+      pad2("Type", fulfillmentMethod === "delivery" ? "Delivery" : "In-cafe") +
+      (fulfillmentMethod === "delivery" ? pad2("Address", deliveryAddressText) : "") +
+      pad2("Payment", paymentMethod + (txnReference ? " (" + txnReference + ")" : "")) +
+      pad2("Status", order.status) +
+      "</pre>\n" +
+      itemsTable + "\n" +
+      "<b>Total: " + total + " ETB</b>"
+    );
+
+    // Payment proof screenshot, if the customer uploaded one - sent
+    // as a separate photo message right after, tagged with the order
+    // code so it's easy to match up in the chat.
+    if (req.file) {
+      sendTelegramPhoto(req.file.path, "🧾 Payment proof — order " + order.order_code);
+    }
 
     res.status(201).json({
       orderCode: order.order_code,

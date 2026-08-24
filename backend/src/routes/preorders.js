@@ -5,7 +5,7 @@ const db = require("../db");
 const { withTransaction } = require("../db");
 const { generateUniquePreorderCode } = require("../lib/preorderCode");
 const { upload } = require("../middleware/upload");
-const { sendTelegramMessage } = require("../lib/telegram");
+const { sendTelegramMessage, sendTelegramPhoto, escapeHtml, formatItemsTable } = require("../lib/telegram");
 
 const router = express.Router();
 
@@ -15,6 +15,14 @@ const router = express.Router();
 function cleanupUpload(file) {
   if (!file) return;
   fs.unlink(file.path, function () { /* best-effort */ });
+}
+
+/* Same "Label   value" row helper as routes/orders.js - keeps the
+   Telegram notification's <pre> block columns aligned. Escapes the
+   value since it may contain customer-entered text. */
+function pad2(label, value) {
+  const labelCol = (label + " ".repeat(10)).slice(0, 10);
+  return labelCol + escapeHtml(value) + "\n";
 }
 
 const PHONE_RE = /^0[79][0-9]{8}$/;
@@ -122,17 +130,28 @@ router.post("/", upload.single("proof"), async function (req, res, next) {
 
     // Fire-and-forget - never let a Telegram hiccup delay or fail the
     // customer's reservation response.
-    const itemsList = preorderItems
-      .map(function (i) { return i.qty + "x " + i.name; })
-      .join("\n");
-    sendTelegramMessage(
-      "📅 <b>New pre-order " + preorder.preorder_code + "</b>\n" +
-      "👤 " + name + " (" + phone + ")\n" +
-      "🗓️ " + date + (time ? " at " + time : "") + " · " + guests + " guest(s)\n" +
-      (itemsList ? "\n" + itemsList + "\n" : "") +
-      (notes ? "\n📝 " + notes + "\n" : "") +
-      "\nSubtotal: " + subtotal + " ETB"
+    const itemsTable = formatItemsTable(
+      preorderItems.map(function (i) { return { qty: i.qty, name: i.name, total: i.lineTotal }; })
     );
+    sendTelegramMessage(
+      "📅 <b>New pre-order " + escapeHtml(preorder.preorder_code) + "</b>\n\n" +
+      "<pre>" +
+      pad2("Customer", name) +
+      pad2("Phone", phone) +
+      pad2("Date", date + (time ? " " + time : "")) +
+      pad2("Guests", guests) +
+      (notes ? pad2("Notes", notes) : "") +
+      "</pre>\n" +
+      (itemsTable ? itemsTable + "\n" : "") +
+      "<b>Subtotal: " + subtotal + " ETB</b>"
+    );
+
+    // Payment proof screenshot, if one was attached (optional here -
+    // see the comment on router.post above). Sent as a separate
+    // photo message, tagged with the pre-order code.
+    if (req.file) {
+      sendTelegramPhoto(req.file.path, "🧾 Payment proof — pre-order " + preorder.preorder_code);
+    }
 
     res.status(201).json({
       preorderCode: preorder.preorder_code,
