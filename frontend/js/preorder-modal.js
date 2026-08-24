@@ -232,10 +232,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function openModal() {
     closeOtherOverlays();
-    resetToForm();
     overlay.classList.add("is-open");
     document.body.classList.add("preorder-modal-open");
     if (firstField) firstField.focus();
+    /* MENU_DATA now comes from a fetch (js/menu-data.js) instead of a
+       synchronous literal - resetToForm() renders the food list from
+       it, so wait for it to be ready first. */
+    window.MENU_DATA_READY.then(resetToForm);
   }
 
   function closeModal() {

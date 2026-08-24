@@ -87,39 +87,44 @@ function fpMarkDeliveryFulfillment() {
 
 document.addEventListener("DOMContentLoaded", function () {
   var list = document.getElementById("food-picker-list");
-  if (!list || typeof SuccessCafeCart === "undefined" || typeof MENU_DATA === "undefined") return;
+  if (!list || typeof SuccessCafeCart === "undefined") return;
 
-  fpRenderList();
+  /* MENU_DATA now comes from a fetch (js/menu-data.js) instead of a
+     synchronous literal, so wait for it before the first render and
+     before wiring up clicks that look items up by id. */
+  window.MENU_DATA_READY.then(function () {
+    fpRenderList();
 
-  list.addEventListener("click", function (event) {
-    var minusBtn = event.target.closest(".fp-minus");
-    var plusBtn = event.target.closest(".fp-plus");
-    if (!minusBtn && !plusBtn) return;
+    list.addEventListener("click", function (event) {
+      var minusBtn = event.target.closest(".fp-minus");
+      var plusBtn = event.target.closest(".fp-plus");
+      if (!minusBtn && !plusBtn) return;
 
-    var id = (minusBtn || plusBtn).getAttribute("data-item-id");
-    var cart = SuccessCafeCart.getCart();
-    var currentQty = fpGetQty(cart, id);
+      var id = (minusBtn || plusBtn).getAttribute("data-item-id");
+      var cart = SuccessCafeCart.getCart();
+      var currentQty = fpGetQty(cart, id);
 
-    if (plusBtn) {
-      if (currentQty === 0) {
-        var item = fpFindItem(id);
-        if (item) SuccessCafeCart.addItem(item);
-        fpUpdateRowQty(id, 1);
-      } else {
-        SuccessCafeCart.setQty(id, currentQty + 1);
-        fpUpdateRowQty(id, currentQty + 1);
+      if (plusBtn) {
+        if (currentQty === 0) {
+          var item = fpFindItem(id);
+          if (item) SuccessCafeCart.addItem(item);
+          fpUpdateRowQty(id, 1);
+        } else {
+          SuccessCafeCart.setQty(id, currentQty + 1);
+          fpUpdateRowQty(id, currentQty + 1);
+        }
+      } else if (minusBtn && currentQty > 0) {
+        SuccessCafeCart.setQty(id, currentQty - 1);
+        fpUpdateRowQty(id, currentQty - 1);
       }
-    } else if (minusBtn && currentQty > 0) {
-      SuccessCafeCart.setQty(id, currentQty - 1);
-      fpUpdateRowQty(id, currentQty - 1);
-    }
 
-    fpMarkDeliveryFulfillment();
-  });
+      fpMarkDeliveryFulfillment();
+    });
 
-  /* Keep the picker in sync if the cart changes elsewhere (e.g. the
-     modal was already open when something was removed via the cart drawer). */
-  document.querySelectorAll(".js-delivery-trigger").forEach(function (trigger) {
-    trigger.addEventListener("click", fpRenderList);
+    /* Keep the picker in sync if the cart changes elsewhere (e.g. the
+       modal was already open when something was removed via the cart drawer). */
+    document.querySelectorAll(".js-delivery-trigger").forEach(function (trigger) {
+      trigger.addEventListener("click", fpRenderList);
+    });
   });
 });

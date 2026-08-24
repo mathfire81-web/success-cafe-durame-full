@@ -149,10 +149,15 @@ function wireAddToCart() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  renderFilterBar();
-  renderMenu();
-  wireFilterBar();
-  wireAddToCart();
+  /* MENU_DATA now comes from a fetch (js/menu-data.js) instead of a
+     synchronous literal, so wait for it before rendering anything
+     that reads from it - see js/menu-data.js for details. */
+  window.MENU_DATA_READY.then(function () {
+    renderFilterBar();
+    renderMenu();
+    wireFilterBar();
+    wireAddToCart();
+  });
   if (typeof SuccessCafeCart !== "undefined") {
     SuccessCafeCart.updateCartBadge();
   }
