@@ -7,6 +7,7 @@ const { upload, UPLOAD_DIR } = require("../middleware/upload");
 const { generateUniqueOrderCode } = require("../lib/orderCode");
 const { getLandmarkById } = require("../lib/delivery");
 const { PAYMENT_METHODS } = require("../lib/paymentMethods");
+const { sendTelegramMessage } = require("../lib/telegram");
 
 const router = express.Router();
 
@@ -157,6 +158,23 @@ router.post("/", upload.single("proof"), async function (req, res, next) {
 
       return orderRow;
     });
+
+    // Fire-and-forget - never let a Telegram hiccup delay or fail the
+    // customer's order response.
+    const itemsList = orderItems
+      .map(function (i) { return i.qty + "x " + i.name; })
+      .join("\n");
+    sendTelegramMessage(
+      "🛎️ <b>New order " + order.order_code + "</b>\n" +
+      "👤 " + name + " (" + phone + ")\n" +
+      (fulfillmentMethod === "delivery"
+        ? "🚗 Delivery: " + deliveryAddressText + "\n"
+        : "🏬 In-cafe\n") +
+      "💳 " + paymentMethod + (txnReference ? " (" + txnReference + ")" : "") + "\n\n" +
+      itemsList + "\n\n" +
+      "Total: " + total + " ETB\n" +
+      "Status: " + order.status
+    );
 
     res.status(201).json({
       orderCode: order.order_code,

@@ -4,6 +4,9 @@
   "private": true,
   "description": "Backend + admin dashboard for Success Cafe Durame - orders, menu, and manual payment verification.",
   "main": "src/server.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",

@@ -5,6 +5,7 @@ const db = require("../db");
 const { withTransaction } = require("../db");
 const { generateUniquePreorderCode } = require("../lib/preorderCode");
 const { upload } = require("../middleware/upload");
+const { sendTelegramMessage } = require("../lib/telegram");
 
 const router = express.Router();
 
@@ -118,6 +119,20 @@ router.post("/", upload.single("proof"), async function (req, res, next) {
 
       return preorderRow;
     });
+
+    // Fire-and-forget - never let a Telegram hiccup delay or fail the
+    // customer's reservation response.
+    const itemsList = preorderItems
+      .map(function (i) { return i.qty + "x " + i.name; })
+      .join("\n");
+    sendTelegramMessage(
+      "📅 <b>New pre-order " + preorder.preorder_code + "</b>\n" +
+      "👤 " + name + " (" + phone + ")\n" +
+      "🗓️ " + date + (time ? " at " + time : "") + " · " + guests + " guest(s)\n" +
+      (itemsList ? "\n" + itemsList + "\n" : "") +
+      (notes ? "\n📝 " + notes + "\n" : "") +
+      "\nSubtotal: " + subtotal + " ETB"
+    );
 
     res.status(201).json({
       preorderCode: preorder.preorder_code,

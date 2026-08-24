@@ -44,6 +44,12 @@ module.exports = {
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   menuPhotosBucket: process.env.SUPABASE_MENU_BUCKET || "menu-images",
 
+  // Telegram notifications (new order / new pre-order alerts). Optional
+  // - lib/telegram.js just no-ops if these aren't set. Get these from
+  // @BotFather (bot token) and @userinfobot or getUpdates (chat id).
+  telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || "",
+  telegramChatId: process.env.TELEGRAM_CHAT_ID || "",
+
   // Layout: backend/, frontend/, and admin/ are sibling folders (see
   // project root). Deliberately NOT nested inside each other - the
   // static file server below only ever serves siteRoot/adminRoot, so
