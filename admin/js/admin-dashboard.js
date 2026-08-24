@@ -652,6 +652,10 @@ function renderPreorderDrawer(p) {
 
   var when = p.reservationDate ? formatShortDate(new Date(p.reservationDate)) + (p.reservationTime ? " at " + p.reservationTime : "") : "\u2014";
 
+  var proofHtml = p.hasProof
+    ? '<img class="proof-thumb" id="preorder-proof-thumb-img" alt="Payment proof screenshot">'
+    : '<p class="no-proof">No screenshot attached.</p>';
+
   var actionsHtml = "";
   if (p.status === "pending") {
     actionsHtml =
@@ -687,6 +691,11 @@ function renderPreorderDrawer(p) {
     (p.notes ? '<div class="drawer-section"><h3>Special Requests</h3><p style="margin:0; font-size:0.88rem;">' + escapeHtml(p.notes) + "</p></div>" : "") +
     (p.adminNote ? '<div class="drawer-section"><h3>Admin Note</h3><p style="margin:0; font-size:0.88rem;">' + escapeHtml(p.adminNote) + "</p></div>" : "") +
 
+    '<div class="drawer-section"><h3>Payment Screenshot</h3>' +
+      '<p class="drawer-hint" style="margin:0 0 4px; font-size:0.8rem; color:var(--dash-text-faint);">Optional \u2014 only present if the guest already sent a deposit.</p>' +
+      proofHtml +
+    "</div>" +
+
     actionsHtml;
 
   var confirmBtn = document.getElementById("preorder-confirm-btn");
@@ -696,6 +705,27 @@ function renderPreorderDrawer(p) {
   if (confirmBtn) confirmBtn.addEventListener("click", function () { runPreorderAction(p.id, "confirmed"); });
   if (cancelBtn) cancelBtn.addEventListener("click", function () { runPreorderAction(p.id, "cancelled"); });
   if (completeBtn) completeBtn.addEventListener("click", function () { runPreorderAction(p.id, "completed"); });
+
+  if (p.hasProof) loadPreorderProofImage(p.id);
+}
+
+function loadPreorderProofImage(preorderId) {
+  var imgEl = document.getElementById("preorder-proof-thumb-img");
+  if (!imgEl) return;
+  fetch((window.API_BASE_URL || "") + "/api/admin/preorders/" + preorderId + "/proof", { credentials: "include" })
+    .then(function (res) {
+      if (!res.ok) throw new Error("Failed to load proof (" + res.status + ")");
+      return res.blob();
+    })
+    .then(function (blob) {
+      imgEl.src = URL.createObjectURL(blob);
+    })
+    .catch(function () {
+      var fallback = document.createElement("p");
+      fallback.className = "no-proof";
+      fallback.textContent = "Couldn't load screenshot.";
+      if (imgEl.parentNode) imgEl.parentNode.replaceChild(fallback, imgEl);
+    });
 }
 
 function runPreorderAction(id, status) {
