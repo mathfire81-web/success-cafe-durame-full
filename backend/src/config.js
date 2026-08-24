@@ -43,6 +43,12 @@ module.exports = {
   supabaseUrl: process.env.SUPABASE_URL || "",
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   menuPhotosBucket: process.env.SUPABASE_MENU_BUCKET || "menu-images",
+  // Payment proof screenshots also need to survive Render's per-deploy
+  // disk wipe (see lib/supabaseStorage.js) - but unlike menu photos
+  // this bucket must be PRIVATE (customer payment screenshots), so it's
+  // only ever read back through the authenticated admin proof route,
+  // never via a public URL.
+  paymentProofBucket: process.env.SUPABASE_PROOF_BUCKET || "payment-proofs",
 
   // Layout: backend/, frontend/, and admin/ are sibling folders (see
   // project root). Deliberately NOT nested inside each other - the

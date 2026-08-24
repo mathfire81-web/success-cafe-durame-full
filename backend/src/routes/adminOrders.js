@@ -1,9 +1,7 @@
 const express = require("express");
-const path = require("path");
-const fs = require("fs");
 const db = require("../db");
 const requireAdmin = require("../middleware/requireAdmin");
-const { UPLOAD_DIR } = require("../middleware/upload");
+const { downloadPaymentProof } = require("../lib/supabaseStorage");
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -95,14 +93,18 @@ router.get("/:id", async function (req, res, next) {
 router.get("/:id/proof", async function (req, res, next) {
   try {
     const result = await db.query("SELECT payment_proof_path FROM orders WHERE id = $1", [req.params.id]);
-    const relativePath = result.rows[0] && result.rows[0].payment_proof_path;
-    if (!relativePath) return res.status(404).json({ error: "No payment proof on this order." });
+    const storagePath = result.rows[0] && result.rows[0].payment_proof_path;
+    if (!storagePath) return res.status(404).json({ error: "No payment proof on this order." });
 
-    const absolutePath = path.join(UPLOAD_DIR, relativePath);
-    if (!absolutePath.startsWith(UPLOAD_DIR) || !fs.existsSync(absolutePath)) {
-      return res.status(404).json({ error: "Proof file not found." });
-    }
-    res.sendFile(absolutePath);
+    // Proof screenshots live in a private Supabase Storage bucket (see
+    // lib/supabaseStorage.js) - fetched here with the service role key
+    // and streamed straight through, so the bucket itself never needs
+    // to be public and this route stays the only way to reach it.
+    const file = await downloadPaymentProof(storagePath);
+    if (!file) return res.status(404).json({ error: "Proof file not found." });
+
+    res.set("Content-Type", file.contentType);
+    res.send(file.buffer);
   } catch (err) {
     next(err);
   }

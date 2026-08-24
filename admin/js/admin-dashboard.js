@@ -83,6 +83,12 @@ function formatShortDate(d) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function resolveImageUrl(url) {
+  if (!url) return "";
+  if (/^(https?:)?\/\//i.test(url) || url.indexOf("data:") === 0) return url;
+  return (window.API_BASE_URL || "") + (url.charAt(0) === "/" ? url : "/" + url);
+}
+
 function escapeHtml(str) {
   var div = document.createElement("div");
   div.textContent = str == null ? "" : str;
@@ -828,7 +834,7 @@ function renderMenuItemsGrid(items) {
   empty.style.display = "none";
 
   grid.innerHTML = items.map(function (item) {
-    var img = item.image ? '<img class="menu-item-card-img" src="' + item.image + '" alt="">' : '<div class="menu-item-card-img"></div>';
+    var img = item.image ? '<img class="menu-item-card-img" src="' + resolveImageUrl(item.image) + '" alt="">' : '<div class="menu-item-card-img"></div>';
     return (
       '<div class="menu-item-card ' + (item.isAvailable ? "" : "is-unavailable") + '" data-item-id="' + item.id + '">' +
         '<button type="button" class="menu-item-card-avail ' + (item.isAvailable ? "is-on" : "") + '" data-toggle-id="' + item.id + '" data-current="' + item.isAvailable + '" title="Toggle availability"><span></span></button>' +
@@ -919,7 +925,7 @@ function openItemDrawer(item) {
     '<div class="form-field"><label>Description</label><textarea id="item-description">' + (item ? escapeHtml(item.description || "") : "") + "</textarea></div>" +
     '<div class="form-field"><label>Photo</label>' +
       '<div class="photo-upload-row">' +
-        '<img class="photo-preview" id="item-photo-preview" src="' + (item && item.image ? escapeHtml(item.image) : "") + '" onerror="this.style.visibility=\'hidden\'" onload="this.style.visibility=\'visible\'">' +
+        '<img class="photo-preview" id="item-photo-preview" src="' + (item && item.image ? escapeHtml(resolveImageUrl(item.image)) : "") + '" onerror="this.style.visibility=\'hidden\'" onload="this.style.visibility=\'visible\'">' +
         '<button type="button" class="btn btn--outline photo-upload-btn" id="item-photo-upload-btn">Upload Photo</button>' +
         '<input type="file" id="item-photo-file" accept="image/*" style="display:none;">' +
       "</div>" +
@@ -987,7 +993,7 @@ function openItemDrawer(item) {
     apiFetch("/api/admin/menu/photo", { method: "POST", body: formData })
       .then(function (data) {
         document.getElementById("item-image").value = data.url;
-        document.getElementById("item-photo-preview").src = data.url;
+        document.getElementById("item-photo-preview").src = resolveImageUrl(data.url);
         statusEl.textContent = "Uploaded.";
       })
       .catch(function (err) { statusEl.textContent = err.message; })
@@ -1163,7 +1169,7 @@ function renderDrawer(order) {
     : '<div class="drawer-row"><span>Fulfillment</span><span>In Cafe</span></div>';
 
   var proofHtml = order.hasProof
-    ? '<img class="proof-thumb" crossorigin="use-credentials" src="' + (window.API_BASE_URL || "") + "/api/admin/orders/" + order.id + '/proof" alt="Payment proof screenshot">'
+    ? '<img class="proof-thumb" id="proof-thumb-img" alt="Payment proof screenshot">'
     : '<p class="no-proof">No screenshot uploaded (cash order).</p>';
 
   var actionsHtml = "";
@@ -1212,6 +1218,27 @@ function renderDrawer(order) {
     runAction(order.id, "reject", { reason: reason });
   });
   if (completeBtn) completeBtn.addEventListener("click", function () { runAction(order.id, "complete"); });
+
+  if (order.hasProof) loadProofImage(order.id);
+}
+
+function loadProofImage(orderId) {
+  var imgEl = document.getElementById("proof-thumb-img");
+  if (!imgEl) return;
+  fetch((window.API_BASE_URL || "") + "/api/admin/orders/" + orderId + "/proof", { credentials: "include" })
+    .then(function (res) {
+      if (!res.ok) throw new Error("Failed to load proof (" + res.status + ")");
+      return res.blob();
+    })
+    .then(function (blob) {
+      imgEl.src = URL.createObjectURL(blob);
+    })
+    .catch(function () {
+      var fallback = document.createElement("p");
+      fallback.className = "no-proof";
+      fallback.textContent = "Couldn't load screenshot.";
+      if (imgEl.parentNode) imgEl.parentNode.replaceChild(fallback, imgEl);
+    });
 }
 
 function runAction(orderId, action, body) {
