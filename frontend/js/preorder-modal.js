@@ -18,6 +18,113 @@ function poFormatPrice(value) {
   return value.toFixed(0) + " ETB";
 }
 
+/* ---- Optional payment-screenshot upload (same pattern as
+   js/payment.js's proof upload - a pre-order has no required payment,
+   but someone who already sent a deposit can attach the receipt). ---- */
+var poProofFile = null;
+var PO_MAX_PROOF_SIZE = 8 * 1024 * 1024; // 8MB
+
+function poFormatFileSize(bytes) {
+  if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function poShowProofError(message) {
+  var uploadField = document.getElementById("preorder-upload-field");
+  var dropzone = document.getElementById("preorder-upload-dropzone");
+  if (uploadField) uploadField.classList.add("has-error");
+  var subEl = dropzone ? dropzone.querySelector(".upload-dropzone-sub") : null;
+  if (subEl) subEl.textContent = message;
+}
+
+function poClearProofError() {
+  var uploadField = document.getElementById("preorder-upload-field");
+  var dropzone = document.getElementById("preorder-upload-dropzone");
+  if (uploadField) uploadField.classList.remove("has-error");
+  var subEl = dropzone ? dropzone.querySelector(".upload-dropzone-sub") : null;
+  if (subEl) subEl.textContent = "Screenshot or photo of your receipt \u00b7 JPG or PNG, up to 8MB";
+}
+
+function poSetProof(file) {
+  if (!file) return;
+
+  if (file.type.indexOf("image/") !== 0) {
+    poShowProofError("Please upload an image file (JPG or PNG).");
+    return;
+  }
+  if (file.size > PO_MAX_PROOF_SIZE) {
+    poShowProofError("That image is too large - please keep it under 8MB.");
+    return;
+  }
+
+  poClearProofError();
+  poProofFile = file;
+
+  var reader = new FileReader();
+  reader.onload = function (event) {
+    var previewImg = document.getElementById("preorder-upload-preview-img");
+    var previewBox = document.getElementById("preorder-upload-preview");
+    var fileNameEl = document.getElementById("preorder-upload-file-name");
+    var dropzone = document.getElementById("preorder-upload-dropzone");
+
+    if (previewImg) previewImg.src = event.target.result;
+    if (fileNameEl) fileNameEl.textContent = file.name + " \u00b7 " + poFormatFileSize(file.size);
+    if (previewBox) previewBox.classList.add("is-visible");
+    if (dropzone) dropzone.style.display = "none";
+  };
+  reader.readAsDataURL(file);
+}
+
+function poClearProof() {
+  poProofFile = null;
+
+  var fileInput = document.getElementById("preorder-field-proof");
+  var previewBox = document.getElementById("preorder-upload-preview");
+  var dropzone = document.getElementById("preorder-upload-dropzone");
+
+  if (fileInput) fileInput.value = "";
+  if (previewBox) previewBox.classList.remove("is-visible");
+  if (dropzone) dropzone.style.display = "";
+  poClearProofError();
+}
+
+function poWireProofUpload() {
+  var dropzone = document.getElementById("preorder-upload-dropzone");
+  var fileInput = document.getElementById("preorder-field-proof");
+  var removeBtn = document.getElementById("preorder-upload-remove");
+
+  if (fileInput) {
+    fileInput.addEventListener("change", function () {
+      if (fileInput.files && fileInput.files[0]) poSetProof(fileInput.files[0]);
+    });
+  }
+
+  if (dropzone) {
+    ["dragenter", "dragover"].forEach(function (evtName) {
+      dropzone.addEventListener(evtName, function (event) {
+        event.preventDefault();
+        dropzone.classList.add("is-dragover");
+      });
+    });
+    ["dragleave", "drop"].forEach(function (evtName) {
+      dropzone.addEventListener(evtName, function (event) {
+        event.preventDefault();
+        dropzone.classList.remove("is-dragover");
+      });
+    });
+    dropzone.addEventListener("drop", function (event) {
+      var file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (file) poSetProof(file);
+    });
+  }
+
+  if (removeBtn) {
+    removeBtn.addEventListener("click", function () {
+      poClearProof();
+    });
+  }
+}
+
 function poGetTotals() {
   var count = 0;
   var total = 0;
@@ -116,9 +223,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (errorEl) errorEl.style.display = "none";
     var submitBtn = document.getElementById("preorder-form-submit-btn");
     if (submitBtn) submitBtn.disabled = false;
+    poClearProof();
     poRenderList();
     poUpdateSummaryBar();
   }
+
+  poWireProofUpload();
 
   function openModal() {
     closeOtherOverlays();
@@ -200,18 +310,22 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function submitPreorder(name, phone, date, time, guests, notes) {
+    /* FormData (not JSON) so the optional payment-screenshot file can
+       ride along in the same request - same pattern as js/payment.js's
+       submitOrder. The server still parses "items" as JSON text. */
+    var formData = new FormData();
+    formData.append("name", name);
+    formData.append("phone", phone);
+    formData.append("date", date);
+    formData.append("time", time);
+    formData.append("guests", guests);
+    formData.append("notes", notes);
+    formData.append("items", JSON.stringify(poBuildItemsPayload()));
+    if (poProofFile) formData.append("proof", poProofFile);
+
     return fetch((window.API_BASE_URL || "") + "/api/preorders", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: name,
-        phone: phone,
-        date: date,
-        time: time,
-        guests: guests,
-        notes: notes,
-        items: poBuildItemsPayload()
-      })
+      body: formData
     }).then(function (res) {
       return res.json().then(function (data) {
         if (!res.ok) throw new Error(data.error || "Something went wrong sending your reservation.");
@@ -252,13 +366,15 @@ document.addEventListener("DOMContentLoaded", function () {
               '<span><strong>Reservation code:</strong> ' + result.preorderCode + '</span>' +
               '<span><strong>Table for:</strong> ' + guests + '</span>' +
               '<span><strong>Date &amp; time:</strong> ' + date + (time ? " at " + time : "") + '</span>' +
-              '<span><strong>Food ready for you:</strong> ' + (totals.count > 0 ? totals.count + " item(s), " + poFormatPrice(totals.total) : "Decide when you arrive") + '</span>';
+              '<span><strong>Food ready for you:</strong> ' + (totals.count > 0 ? totals.count + " item(s), " + poFormatPrice(totals.total) : "Decide when you arrive") + '</span>' +
+              (poProofFile ? '<span><strong>Payment screenshot:</strong> Received</span>' : '');
           }
           var successName = document.getElementById("preorder-success-name");
           if (successName) successName.textContent = name ? name + ", " : "";
 
           form.style.display = "none";
           if (successPanel) successPanel.classList.add("is-visible");
+          poClearProof();
         })
         .catch(function (err) {
           showPreorderError(err.message || "Something went wrong sending your reservation. Please try again.");

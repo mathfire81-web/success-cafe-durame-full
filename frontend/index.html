@@ -67,6 +67,10 @@
   <symbol id="icon-check" viewBox="0 0 24 24">
     <path d="M4.5 12.5 9.5 17.5 19.5 6.5"/>
   </symbol>
+  <symbol id="icon-upload" viewBox="0 0 24 24">
+    <path d="M12 15.5V4.5M12 4.5 8 8.7M12 4.5l4 4.2"/>
+    <path d="M4.5 15v3.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V15"/>
+  </symbol>
   <symbol id="icon-trash" viewBox="0 0 24 24">
     <path d="M4 7h16"/>
     <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>
@@ -865,6 +869,26 @@
         <div class="form-field is-full">
           <label for="preorder-notes">Special Requests <span class="label-am">ምግቦት ለይ ምን ግበኝት አይካተት</span></label>
           <textarea class="form-textarea" id="preorder-notes" name="notes" placeholder="Allergies (አላርጂ ካለበት ያሳወቁን)"></textarea>
+        </div>
+
+        <div class="upload-field is-visible" id="preorder-upload-field">
+          <label for="preorder-field-proof">Payment Screenshot <span class="label-am">(የከፈሉበት ደረሰኝ ፎቶ)</span> <span class="upload-field-optional">Optional</span></label>
+          <div class="upload-dropzone" id="preorder-upload-dropzone">
+            <input type="file" id="preorder-field-proof" name="proof" accept="image/*" aria-describedby="preorder-upload-hint">
+            <div class="upload-dropzone-icon"><svg class="icon" aria-hidden="true"><use href="#icon-upload"></use></svg></div>
+            <p class="upload-dropzone-title">Already paid a deposit? Attach your receipt <span class="label-am">(ቅድመ ክፍያ ከከፈሉ ደረሰኙን ያያይዙ)</span></p>
+            <p class="upload-dropzone-sub" id="preorder-upload-hint">Screenshot or photo of your receipt &middot; JPG or PNG, up to 8MB</p>
+          </div>
+          <div class="upload-preview" id="preorder-upload-preview">
+            <img id="preorder-upload-preview-img" src="" alt="Payment screenshot preview">
+            <div class="upload-preview-info">
+              <div class="file-name" id="preorder-upload-file-name"></div>
+              <div class="file-status"><svg class="icon" aria-hidden="true"><use href="#icon-check"></use></svg>Attached (ተያይዟል)</div>
+            </div>
+            <button type="button" class="upload-preview-remove" id="preorder-upload-remove" aria-label="Remove uploaded photo">
+              <svg class="icon" aria-hidden="true"><use href="#icon-close"></use></svg>
+            </button>
+          </div>
         </div>
 
         <p class="preorder-form-error" id="preorder-form-error" role="alert" style="display:none; color:#c0392b; margin:0 0 12px;"></p>
