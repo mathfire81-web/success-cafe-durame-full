@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard - Success Cafe Admin</title>
 <link rel="stylesheet" href="css/admin.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 </head>
 <body class="is-dashboard">
 <div class="dash-shell">
@@ -48,18 +49,18 @@
         Ideas
         <span class="sb-badge" id="badge-ideas-total">0</span>
       </button>
-      <a class="sb-link" href="/menu.html" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5V4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-        Menu Page
-      </a>
-      <a class="sb-link" href="/delivery.html" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
-        Delivery Zones
-      </a>
-      <a class="sb-link" href="/index.html" target="_blank" rel="noopener">
+      <a class="sb-link" id="storefront-link" href="#" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9h12v-9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
         View Storefront
       </a>
+      <button type="button" class="sb-link" data-view="menu">
+        <svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5V4Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 10h6M9 14h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Menu Page
+      </button>
+      <button type="button" class="sb-link" data-view="delivery">
+        <svg viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        Delivery Zones
+      </button>
 
       <p class="sb-label">Quick Filters</p>
       <button type="button" class="sb-link sb-link--sub" data-view="orders" data-status="pending_verification">
@@ -321,6 +322,57 @@
         <div class="pagination-controls" id="ideas-pagination-controls"></div>
       </div>
     </section>
+
+    <!-- ============ MENU MANAGEMENT VIEW ============ -->
+    <section class="dash-view" id="view-menu" style="display:none;">
+
+      <div class="menu-cat-bar" id="menu-cat-tabs">
+        <!-- category tabs injected here, plus an "All" tab and "+ Category" button -->
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-search">
+          <svg viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" id="menu-items-search" placeholder="Search this page: name, description...">
+        </div>
+        <button type="button" class="btn btn--outline" id="add-category-btn">+ Category</button>
+        <button type="button" class="btn btn--primary" id="add-item-btn">+ Item</button>
+      </div>
+
+      <div class="menu-item-grid" id="menu-items-grid"></div>
+      <div class="empty-state" id="menu-items-empty" style="display:none;">No items in this category yet.</div>
+    </section>
+
+    <!-- ============ DELIVERY ZONES VIEW ============ -->
+    <section class="dash-view" id="view-delivery" style="display:none;">
+
+      <div id="zones-map" class="zones-map"></div>
+
+      <div class="toolbar">
+        <div class="toolbar-search">
+          <svg viewBox="0 0 24 24"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input type="text" id="zones-search" placeholder="Search this page: zone name...">
+        </div>
+        <button type="button" class="btn btn--primary" id="add-zone-btn">+ Delivery Zone</button>
+      </div>
+
+      <div class="orders-table-wrap">
+        <table class="orders-table" id="zones-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Coordinates</th>
+              <th>Distance</th>
+              <th>Est. Fee</th>
+              <th>Est. Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="zones-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="zones-empty" style="display:none;">No delivery zones yet.</div>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -335,6 +387,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="js/api-config.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="js/admin-dashboard.js"></script>
 </body>
 </html>

@@ -57,7 +57,14 @@ var state = {
   ipage: 1,
   ipageSize: 12,
   itotal: 0,
-  ideasOnPage: []
+  ideasOnPage: [],
+
+  categories: [],
+  items: [],
+  menuCategoryFilter: "",
+  menuSearch: "",
+
+  zones: []
 };
 
 /* ---------------- helpers ---------------- */
@@ -765,6 +772,373 @@ function renderIdeasGrid(ideas) {
 
 /* ---------------- detail drawer ---------------- */
 
+/* ---------------- menu management ---------------- */
+
+function loadMenuData() {
+  return Promise.all([
+    apiFetch("/api/admin/menu/categories"),
+    apiFetch("/api/admin/menu/items")
+  ]).then(function (results) {
+    state.categories = results[0].categories;
+    state.items = results[1].items;
+    renderCategoryTabs();
+    applyMenuFiltersAndRender();
+    markUpdated();
+  });
+}
+
+function renderCategoryTabs() {
+  var bar = document.getElementById("menu-cat-tabs");
+  var html = '<button type="button" class="menu-cat-tab ' + (state.menuCategoryFilter === "" ? "is-active" : "") + '" data-cat="">All Items</button>';
+  html += state.categories.map(function (cat) {
+    var count = state.items.filter(function (i) { return i.categoryId === cat.id; }).length;
+    return (
+      '<button type="button" class="menu-cat-tab ' + (state.menuCategoryFilter === String(cat.id) ? "is-active" : "") + '" data-cat="' + cat.id + '">' +
+        escapeHtml(cat.name) + " (" + count + ")" +
+        ' <span class="cat-edit" data-edit-cat="' + cat.id + '" title="Edit category">\u270e</span>' +
+      "</button>"
+    );
+  }).join("");
+  bar.innerHTML = html;
+}
+
+function applyMenuFiltersAndRender() {
+  var text = state.menuSearch.toLowerCase();
+  var filtered = state.items.filter(function (item) {
+    if (state.menuCategoryFilter && String(item.categoryId) !== state.menuCategoryFilter) return false;
+    if (text) {
+      var hay = (item.name + " " + (item.description || "")).toLowerCase();
+      if (hay.indexOf(text) === -1) return false;
+    }
+    return true;
+  });
+  renderMenuItemsGrid(filtered);
+}
+
+function renderMenuItemsGrid(items) {
+  var grid = document.getElementById("menu-items-grid");
+  var empty = document.getElementById("menu-items-empty");
+  if (!items.length) {
+    grid.innerHTML = "";
+    grid.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+  grid.style.display = "";
+  empty.style.display = "none";
+
+  grid.innerHTML = items.map(function (item) {
+    var img = item.image ? '<img class="menu-item-card-img" src="' + item.image + '" alt="">' : '<div class="menu-item-card-img"></div>';
+    return (
+      '<div class="menu-item-card ' + (item.isAvailable ? "" : "is-unavailable") + '" data-item-id="' + item.id + '">' +
+        '<button type="button" class="menu-item-card-avail ' + (item.isAvailable ? "is-on" : "") + '" data-toggle-id="' + item.id + '" data-current="' + item.isAvailable + '" title="Toggle availability"><span></span></button>' +
+        img +
+        '<div class="menu-item-card-body">' +
+          (item.badge ? '<span class="menu-item-card-badge">' + escapeHtml(item.badge) + "</span>" : "") +
+          '<div class="menu-item-card-top"><span class="menu-item-card-name">' + escapeHtml(item.name) + "</span>" +
+            '<span class="menu-item-card-price">' + formatMoney(item.price) + "</span></div>" +
+          '<span class="menu-item-card-desc">' + escapeHtml(item.description || "") + "</span>" +
+          (item.isAvailable ? "" : '<span class="menu-item-card-badge" style="color:var(--status-red);">Unavailable</span>') +
+        "</div>" +
+      "</div>"
+    );
+  }).join("");
+}
+
+function openCategoryDrawer(category) {
+  var isNew = !category;
+  var content = document.getElementById("drawer-content");
+  content.innerHTML =
+    "<h2>" + (isNew ? "Add Category" : "Edit Category") + "</h2>" +
+    '<p class="form-error" id="cat-form-error"></p>' +
+    '<div class="form-field"><label>Name</label><input type="text" id="cat-name" value="' + (category ? escapeHtml(category.name) : "") + '"></div>' +
+    '<div class="form-field"><label>Amharic Name (optional)</label><input type="text" id="cat-name-am" value="' + (category ? escapeHtml(category.nameAm || "") : "") + '"></div>' +
+    '<div class="form-field"><label>Sort Order</label><input type="number" id="cat-sort" value="' + (category ? category.sortOrder : 0) + '"></div>' +
+    '<div class="drawer-actions">' +
+      (isNew ? "" : '<button type="button" class="drawer-btn reject" id="cat-delete-btn">Delete</button>') +
+      '<button type="button" class="drawer-btn verify" id="cat-save-btn">' + (isNew ? "Add" : "Save") + "</button>" +
+    "</div>";
+
+  document.getElementById("cat-save-btn").addEventListener("click", function () {
+    var errEl = document.getElementById("cat-form-error");
+    var body = {
+      name: document.getElementById("cat-name").value.trim(),
+      nameAm: document.getElementById("cat-name-am").value.trim(),
+      sortOrder: document.getElementById("cat-sort").value
+    };
+    var req = isNew
+      ? apiFetch("/api/admin/menu/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      : apiFetch("/api/admin/menu/categories/" + category.id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    req.then(function () {
+      closeDrawer();
+      showToast(isNew ? "Category added." : "Category updated.");
+      loadMenuData();
+    }).catch(function (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add("is-visible");
+    });
+  });
+
+  var deleteBtn = document.getElementById("cat-delete-btn");
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", function () {
+      if (!confirm('Delete category "' + category.name + '"?')) return;
+      apiFetch("/api/admin/menu/categories/" + category.id, { method: "DELETE" }).then(function () {
+        closeDrawer();
+        showToast("Category deleted.");
+        loadMenuData();
+      }).catch(function (err) {
+        var errEl = document.getElementById("cat-form-error");
+        errEl.textContent = err.message;
+        errEl.classList.add("is-visible");
+      });
+    });
+  }
+
+  document.getElementById("drawer-overlay").classList.add("is-open");
+}
+
+function openItemDrawer(item) {
+  var isNew = !item;
+  var content = document.getElementById("drawer-content");
+  var catOptions = state.categories.map(function (cat) {
+    var selected = item && item.categoryId === cat.id ? "selected" : (!item && state.menuCategoryFilter === String(cat.id) ? "selected" : "");
+    return '<option value="' + cat.id + '" ' + selected + ">" + escapeHtml(cat.name) + "</option>";
+  }).join("");
+
+  content.innerHTML =
+    "<h2>" + (isNew ? "Add Item" : "Edit Item") + "</h2>" +
+    '<p class="form-error" id="item-form-error"></p>' +
+    '<div class="form-field"><label>Name</label><input type="text" id="item-name" value="' + (item ? escapeHtml(item.name) : "") + '"></div>' +
+    '<div class="form-field"><label>Amharic Name (optional)</label><input type="text" id="item-name-am" value="' + (item ? escapeHtml(item.nameAm || "") : "") + '"></div>' +
+    '<div class="form-field"><label>Category</label><select id="item-category">' + catOptions + "</select></div>" +
+    '<div class="form-row">' +
+      '<div class="form-field"><label>Price (ETB)</label><input type="number" id="item-price" step="0.01" value="' + (item ? item.price : "") + '"></div>' +
+      '<div class="form-field"><label>Badge (optional)</label><input type="text" id="item-badge" placeholder="New, Popular..." value="' + (item ? escapeHtml(item.badge || "") : "") + '"></div>' +
+    "</div>" +
+    '<div class="form-field"><label>Description</label><textarea id="item-description">' + (item ? escapeHtml(item.description || "") : "") + "</textarea></div>" +
+    '<div class="form-field"><label>Photo</label>' +
+      '<div class="photo-upload-row">' +
+        '<img class="photo-preview" id="item-photo-preview" src="' + (item && item.image ? escapeHtml(item.image) : "") + '" onerror="this.style.visibility=\'hidden\'" onload="this.style.visibility=\'visible\'">' +
+        '<button type="button" class="btn btn--outline photo-upload-btn" id="item-photo-upload-btn">Upload Photo</button>' +
+        '<input type="file" id="item-photo-file" accept="image/*" style="display:none;">' +
+      "</div>" +
+      '<input type="text" id="item-image" placeholder="Or paste an image URL" value="' + (item ? escapeHtml(item.image || "") : "") + '" style="margin-top:8px;">' +
+      '<div class="photo-upload-status" id="item-photo-status"></div>' +
+    "</div>" +
+    '<div class="form-check"><input type="checkbox" id="item-available" ' + (!item || item.isAvailable ? "checked" : "") + '> <label for="item-available" style="margin:0;">Available on the menu</label></div>' +
+    '<div class="drawer-actions">' +
+      (isNew ? "" : '<button type="button" class="drawer-btn reject" id="item-delete-btn">Delete</button>') +
+      '<button type="button" class="drawer-btn verify" id="item-save-btn">' + (isNew ? "Add" : "Save") + "</button>" +
+    "</div>";
+
+  document.getElementById("item-save-btn").addEventListener("click", function () {
+    var errEl = document.getElementById("item-form-error");
+    var body = {
+      name: document.getElementById("item-name").value.trim(),
+      nameAm: document.getElementById("item-name-am").value.trim(),
+      categoryId: document.getElementById("item-category").value,
+      price: document.getElementById("item-price").value,
+      badge: document.getElementById("item-badge").value.trim(),
+      description: document.getElementById("item-description").value.trim(),
+      image: document.getElementById("item-image").value.trim(),
+      isAvailable: document.getElementById("item-available").checked
+    };
+    var req = isNew
+      ? apiFetch("/api/admin/menu/items", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      : apiFetch("/api/admin/menu/items/" + item.id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    req.then(function () {
+      closeDrawer();
+      showToast(isNew ? "Item added." : "Item updated.");
+      loadMenuData();
+    }).catch(function (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add("is-visible");
+    });
+  });
+
+  var deleteBtn = document.getElementById("item-delete-btn");
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", function () {
+      if (!confirm('Delete "' + item.name + '"?')) return;
+      apiFetch("/api/admin/menu/items/" + item.id, { method: "DELETE" }).then(function () {
+        closeDrawer();
+        showToast("Item deleted.");
+        loadMenuData();
+      }).catch(function (err) {
+        var errEl = document.getElementById("item-form-error");
+        errEl.textContent = err.message;
+        errEl.classList.add("is-visible");
+      });
+    });
+  }
+
+  var uploadBtn = document.getElementById("item-photo-upload-btn");
+  var fileInput = document.getElementById("item-photo-file");
+  var statusEl = document.getElementById("item-photo-status");
+  uploadBtn.addEventListener("click", function () { fileInput.click(); });
+  fileInput.addEventListener("change", function () {
+    var file = fileInput.files[0];
+    if (!file) return;
+    statusEl.textContent = "Uploading...";
+    uploadBtn.disabled = true;
+    var formData = new FormData();
+    formData.append("photo", file);
+    apiFetch("/api/admin/menu/photo", { method: "POST", body: formData })
+      .then(function (data) {
+        document.getElementById("item-image").value = data.url;
+        document.getElementById("item-photo-preview").src = data.url;
+        statusEl.textContent = "Uploaded.";
+      })
+      .catch(function (err) { statusEl.textContent = err.message; })
+      .then(function () { uploadBtn.disabled = false; });
+  });
+
+  document.getElementById("drawer-overlay").classList.add("is-open");
+}
+
+/* ---------------- delivery zones ---------------- */
+
+var CAFE_LOCATION = { lat: 7.2449066412107825, lng: 37.90079484003493 };
+var zonesMapInstance = null;
+var zonesMapMarkers = [];
+
+function renderZonesMap(zones) {
+  if (typeof L === "undefined") return; // Leaflet failed to load (offline CDN, etc.) - map is a nice-to-have, not required
+  if (!zonesMapInstance) {
+    zonesMapInstance = L.map("zones-map").setView([CAFE_LOCATION.lat, CAFE_LOCATION.lng], 14);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+      maxZoom: 19
+    }).addTo(zonesMapInstance);
+    L.marker([CAFE_LOCATION.lat, CAFE_LOCATION.lng], {
+      icon: L.divIcon({ className: "", html: '<div style="background:#e2691f;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 0 2px #e2691f;"></div>', iconSize: [16, 16] })
+    }).addTo(zonesMapInstance).bindPopup("<b>Success Cafe</b>");
+  }
+
+  zonesMapMarkers.forEach(function (m) { zonesMapInstance.removeLayer(m); });
+  zonesMapMarkers = zones.map(function (z) {
+    var marker = L.marker([z.lat, z.lng]).addTo(zonesMapInstance);
+    marker.bindPopup("<b>" + escapeHtml(z.name) + "</b>" + z.km + " km &middot; " + formatMoney(z.fee));
+    marker.on("click", function () { openZoneDrawer(z); });
+    return marker;
+  });
+
+  // Fit the map to show the cafe + all zones, so a new zone far away is never hidden off-screen.
+  if (zones.length) {
+    var bounds = L.latLngBounds([[CAFE_LOCATION.lat, CAFE_LOCATION.lng]].concat(zones.map(function (z) { return [z.lat, z.lng]; })));
+    zonesMapInstance.fitBounds(bounds, { padding: [30, 30] });
+  }
+  setTimeout(function () { zonesMapInstance.invalidateSize(); }, 100);
+}
+
+function loadZones() {
+  return apiFetch("/api/admin/delivery-zones").then(function (data) {
+    state.zones = data.landmarks;
+    applyZoneFiltersAndRender();
+    renderZonesMap(state.zones);
+    markUpdated();
+  });
+}
+
+function applyZoneFiltersAndRender() {
+  var text = (document.getElementById("zones-search").value || "").toLowerCase();
+  var filtered = state.zones.filter(function (z) { return !text || z.name.toLowerCase().indexOf(text) !== -1; });
+  renderZonesTable(filtered);
+}
+
+function renderZonesTable(zones) {
+  var tbody = document.getElementById("zones-tbody");
+  var empty = document.getElementById("zones-empty");
+  var table = document.getElementById("zones-table");
+  if (!zones.length) {
+    tbody.innerHTML = "";
+    table.style.display = "none";
+    empty.style.display = "block";
+    return;
+  }
+  table.style.display = "";
+  empty.style.display = "none";
+
+  tbody.innerHTML = zones.map(function (z) {
+    return (
+      '<tr data-zone-id="' + z.id + '">' +
+        "<td>" + escapeHtml(z.name) + (z.approx ? ' <small style="color:var(--dash-text-faint);">(approx.)</small>' : "") + "</td>" +
+        "<td><small>" + z.lat + ", " + z.lng + "</small></td>" +
+        "<td>" + z.km + " km</td>" +
+        "<td>" + formatMoney(z.fee) + "</td>" +
+        "<td>" + z.timeLabel + "</td>" +
+        '<td><button type="button" class="row-view-btn" data-id="' + z.id + '" title="Edit"><svg viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a2 2 0 0 0 0-2.8L17.3 5.5a2 2 0 0 0-2.8 0L4 16v4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button></td>' +
+      "</tr>"
+    );
+  }).join("");
+}
+
+function openZoneDrawer(zone) {
+  var isNew = !zone;
+  var content = document.getElementById("drawer-content");
+  content.innerHTML =
+    "<h2>" + (isNew ? "Add Delivery Zone" : "Edit Delivery Zone") + "</h2>" +
+    '<p class="drawer-sub">Fee and time are calculated automatically from distance to the caf\u00e9 \u2014 you only set the location.</p>' +
+    '<p class="form-error" id="zone-form-error"></p>' +
+    '<div class="form-field"><label>Zone ID (URL-safe, used internally)</label><input type="text" id="zone-id" value="' + (zone ? escapeHtml(zone.id) : "") + '" placeholder="auto-generated from name if left blank"></div>' +
+    '<div class="form-field"><label>Name</label><input type="text" id="zone-name" value="' + (zone ? escapeHtml(zone.name) : "") + '"></div>' +
+    '<div class="form-row">' +
+      '<div class="form-field"><label>Latitude</label><input type="number" step="0.000001" id="zone-lat" value="' + (zone ? zone.lat || "" : "") + '"></div>' +
+      '<div class="form-field"><label>Longitude</label><input type="number" step="0.000001" id="zone-lng" value="' + (zone ? zone.lng || "" : "") + '"></div>' +
+    "</div>" +
+    '<div class="form-check"><input type="checkbox" id="zone-approx" ' + (zone && zone.approx ? "checked" : "") + '> <label for="zone-approx" style="margin:0;">Approximate location</label></div>' +
+    '<div class="drawer-actions">' +
+      (isNew ? "" : '<button type="button" class="drawer-btn reject" id="zone-delete-btn">Delete</button>') +
+      '<button type="button" class="drawer-btn verify" id="zone-save-btn">' + (isNew ? "Add" : "Save") + "</button>" +
+    "</div>";
+
+  document.getElementById("zone-save-btn").addEventListener("click", function () {
+    var errEl = document.getElementById("zone-form-error");
+    var idFieldValue = document.getElementById("zone-id").value.trim();
+    var body = {
+      name: document.getElementById("zone-name").value.trim(),
+      lat: document.getElementById("zone-lat").value,
+      lng: document.getElementById("zone-lng").value,
+      approx: document.getElementById("zone-approx").checked
+    };
+    if (isNew) {
+      body.id = idFieldValue;
+    } else if (idFieldValue && idFieldValue !== zone.id) {
+      body.newId = idFieldValue;
+    }
+    var req = isNew
+      ? apiFetch("/api/admin/delivery-zones", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      : apiFetch("/api/admin/delivery-zones/" + zone.id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    req.then(function () {
+      closeDrawer();
+      showToast(isNew ? "Zone added." : "Zone updated.");
+      loadZones();
+    }).catch(function (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add("is-visible");
+    });
+  });
+
+  var deleteBtn = document.getElementById("zone-delete-btn");
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", function () {
+      if (!confirm('Delete delivery zone "' + zone.name + '"?')) return;
+      apiFetch("/api/admin/delivery-zones/" + zone.id, { method: "DELETE" }).then(function () {
+        closeDrawer();
+        showToast("Zone deleted.");
+        loadZones();
+      }).catch(function (err) {
+        var errEl = document.getElementById("zone-form-error");
+        errEl.textContent = err.message;
+        errEl.classList.add("is-visible");
+      });
+    });
+  }
+
+  document.getElementById("drawer-overlay").classList.add("is-open");
+}
+
 function openDrawer(orderId) {
   apiFetch("/api/admin/orders/" + orderId).then(function (order) {
     renderDrawer(order);
@@ -862,8 +1236,15 @@ function switchView(view, status) {
   document.getElementById("view-orders").style.display = view === "orders" ? "" : "none";
   document.getElementById("view-preorders").style.display = view === "preorders" ? "" : "none";
   document.getElementById("view-ideas").style.display = view === "ideas" ? "" : "none";
+  document.getElementById("view-menu").style.display = view === "menu" ? "" : "none";
+  document.getElementById("view-delivery").style.display = view === "delivery" ? "" : "none";
   document.getElementById("header-title").textContent =
-    view === "dashboard" ? "Dashboard" : (view === "orders" ? "Orders" : (view === "preorders" ? "Pre-Orders" : "Ideas"));
+    view === "dashboard" ? "Dashboard" :
+    view === "orders" ? "Orders" :
+    view === "preorders" ? "Pre-Orders" :
+    view === "ideas" ? "Ideas" :
+    view === "menu" ? "Menu Management" :
+    view === "delivery" ? "Delivery Zones" : "";
 
   Array.prototype.forEach.call(document.querySelectorAll(".sb-link[data-view]"), function (link) {
     link.classList.toggle("is-active", link.getAttribute("data-view") === view && !link.classList.contains("sb-link--sub"));
@@ -877,6 +1258,10 @@ function switchView(view, status) {
     loadPreorderStatusCounts();
   } else if (view === "ideas") {
     loadIdeasPage();
+  } else if (view === "menu") {
+    loadMenuData();
+  } else if (view === "delivery") {
+    loadZones();
   }
   closeSidebarMobile();
 }
@@ -913,6 +1298,17 @@ document.addEventListener("DOMContentLoaded", function () {
       switchView(view, status !== null ? status : undefined);
     });
   });
+
+  /* "View Storefront" needs the actual frontend origin, not a relative
+     path - this admin dashboard and the storefront are two separate
+     Vercel deployments (see js/api-config.js for the same pattern). */
+  var storefrontLink = document.getElementById("storefront-link");
+  if (storefrontLink) {
+    storefrontLink.href =
+      (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:3000/"
+        : "https://success-cafe-durame.vercel.app/";
+  }
 
   document.getElementById("view-all-orders").addEventListener("click", function () { switchView("orders", state.status); });
 
@@ -1036,4 +1432,59 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("ideas-search").addEventListener("input", applyIdeaFiltersAndRender);
   document.getElementById("filter-idea-category").addEventListener("change", applyIdeaFiltersAndRender);
   document.getElementById("refresh-ideas-btn").addEventListener("click", loadIdeasPage);
+
+  /* Menu management: category tabs, search, add buttons, item card click opens edit drawer */
+  document.getElementById("menu-cat-tabs").addEventListener("click", function (event) {
+    var editIcon = event.target.closest("[data-edit-cat]");
+    if (editIcon) {
+      event.stopPropagation();
+      var cat = state.categories.filter(function (c) { return String(c.id) === editIcon.getAttribute("data-edit-cat"); })[0];
+      if (cat) openCategoryDrawer(cat);
+      return;
+    }
+    var tab = event.target.closest(".menu-cat-tab");
+    if (!tab) return;
+    state.menuCategoryFilter = tab.getAttribute("data-cat") || "";
+    renderCategoryTabs();
+    applyMenuFiltersAndRender();
+  });
+  document.getElementById("menu-items-search").addEventListener("input", function () {
+    state.menuSearch = this.value;
+    applyMenuFiltersAndRender();
+  });
+  document.getElementById("add-category-btn").addEventListener("click", function () { openCategoryDrawer(null); });
+  document.getElementById("add-item-btn").addEventListener("click", function () {
+    if (!state.categories.length) { showToast("Add a category first."); return; }
+    openItemDrawer(null);
+  });
+  document.getElementById("menu-items-grid").addEventListener("click", function (event) {
+    var toggleBtn = event.target.closest(".menu-item-card-avail");
+    if (toggleBtn) {
+      event.stopPropagation();
+      var newState = toggleBtn.getAttribute("data-current") !== "true";
+      apiFetch("/api/admin/menu/items/" + toggleBtn.getAttribute("data-toggle-id") + "/availability", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isAvailable: newState })
+      }).then(function () {
+        loadMenuData();
+      }).catch(function (err) { showToast(err.message); });
+      return;
+    }
+    var card = event.target.closest(".menu-item-card");
+    if (!card) return;
+    var item = state.items.filter(function (i) { return i.id === card.getAttribute("data-item-id"); })[0];
+    if (item) openItemDrawer(item);
+  });
+
+  /* Delivery zones: search, add, row click opens edit drawer */
+  document.getElementById("zones-search").addEventListener("input", applyZoneFiltersAndRender);
+  document.getElementById("add-zone-btn").addEventListener("click", function () { openZoneDrawer(null); });
+  document.getElementById("zones-tbody").addEventListener("click", function (event) {
+    var viewBtn = event.target.closest(".row-view-btn");
+    var row = event.target.closest("tr");
+    if (!row) return;
+    var zone = state.zones.filter(function (z) { return z.id === row.getAttribute("data-zone-id"); })[0];
+    if (zone) openZoneDrawer(zone);
+  });
 });

@@ -33,6 +33,16 @@ module.exports = {
   seedAdminPassword: process.env.ADMIN_PASSWORD || "",
 
   maxProofUploadBytes: 8 * 1024 * 1024, // 8MB, matches MAX_PROOF_SIZE in js/payment.js
+  maxMenuPhotoBytes: 5 * 1024 * 1024, // 5MB
+
+  // Supabase Storage, used ONLY for menu item photos an admin uploads
+  // from the dashboard - Render's own disk is wiped on every deploy,
+  // so photos can't live there. Optional: the upload route checks for
+  // these itself and returns a clear error rather than crashing
+  // startup if they're not set yet.
+  supabaseUrl: process.env.SUPABASE_URL || "",
+  supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  menuPhotosBucket: process.env.SUPABASE_MENU_BUCKET || "menu-images",
 
   // Layout: backend/, frontend/, and admin/ are sibling folders (see
   // project root). Deliberately NOT nested inside each other - the

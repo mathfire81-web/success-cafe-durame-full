@@ -46,6 +46,8 @@ async function getLandmarkById(id) {
   return {
     id: row.id,
     name: row.name,
+    lat: row.lat,
+    lng: row.lng,
     approx: row.approx,
     km: est.km,
     fee: est.fee,
@@ -63,6 +65,8 @@ async function listLandmarks() {
     return {
       id: row.id,
       name: row.name,
+      lat: row.lat,
+      lng: row.lng,
       approx: row.approx,
       km: Number(est.km.toFixed(1)),
       fee: est.fee,
